@@ -9,6 +9,8 @@ numpy
 pandas
 scikit-learn
 
+
+
 # tests/linter
 black
 coverage
@@ -27,3 +29,33 @@ six>=1.14
 joblib
 memoized-property
 termcolor
+
+# new ds
+torch
+torchaudio
+spectralcluster
+python-dotenv
+
+
+
+# new API
+uvicorn
+fastapi
+
+
+# new utilities
+ffmpeg-python
+pytest-shutil
+python-multipart
+
+# pyannote
+pyannote.audio
+pyannote.database
+pyannote.core
+
+#audio
+pydub
+wave
+
+#azure
+azure.cognitiveservices.speech
