@@ -1,7 +1,7 @@
 import os
 from audio import Audio
 from diarization import Diarization
-from google_client import GoogleClient
+from google_clients import StorageClient
 
 #sudo apt install ffmpeg
 
@@ -32,10 +32,25 @@ if __name__ == "__main__":
     credential_path = '/home/clement/code/titiforaworld/gcp/intense-elysium-346915-f2127c89e62b.json'
 
     # Instanciate google client
-    gClient = GoogleClient(project_name, credential_path)
-    print(gClient.get_bucket_blobs(bucket_name))
+    gsClient = StorageClient(project_name, credential_path)
 
-    test_audio = Audio('/home/clement/code/titiforaworld/flying-words/raw_data/samples/data_12841-02.04.2022-ITEMA_22982781-2022C20675E0002-21_sample_0_600.wav')
-    diarization = Diarization(source=test_audio)
-    diarization.make_diarization()
-    print(diarization.diarization_output())
+    # Get blobs from bucket_name
+    blobs = gsClient.get_bucket_blobs(bucket_name)
+
+    # Download blob
+    blob_uri = 'gs://le-wagon-project-75667-antoine/data/16119-17.04.2022-ITEMA_22998007-2022C6119S0107-21.mp3'
+    output_path = os.path.join(data_raw_path, os.path.basename(blob_uri))
+    gsClient.download_blob(blob_uri, output_path)
+
+
+
+
+
+
+
+
+
+    # test_audio = Audio('/home/clement/code/titiforaworld/flying-words/raw_data/samples/data_12841-02.04.2022-ITEMA_22982781-2022C20675E0002-21_sample_0_600.wav')
+    # diarization = Diarization(source=test_audio)
+    # diarization.make_diarization()
+    # print(diarization.diarization_output())
