@@ -52,6 +52,9 @@ python-multipart
 pyannote.audio
 pyannote.database
 pyannote.core
+pyannote.pipeline
+pyannote.metrics
+https://github.com/pyannote/pyannote-audio/archive/develop.zip
 
 #audio
 pydub
@@ -59,3 +62,13 @@ wave
 
 #azure
 azure.cognitiveservices.speech
+
+#google
+google-cloud-speech
+google-cloud-storage
+
+#
+protobuf==3.19.0
+
+#
+speechbrain

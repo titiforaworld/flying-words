@@ -1,6 +1,6 @@
 from genericpath import exists
 import os
-from google_client import GoogleClient
+from google_clients import StorageClient
 import pydub
 from pydub import AudioSegment
 from copy import copy
@@ -11,7 +11,7 @@ from utils import time_it
 class Audio:
     """A class for audio processing."""
 
-    def __init__(self, source: str or GoogleClient):
+    def __init__(self, source: str or StorageClient):
         """Constructor for Audio class."""
 
         # if isinstance(source, GoogleClient):
@@ -49,7 +49,7 @@ class Audio:
         # Create output filepath
         sample_filename_suffix = f'_sample_{start}_{length}'
         output_filename = f'{os.path.splitext(os.path.basename(self.filepath))[0]}{sample_filename_suffix}_{label}.wav'
-        output_path = os.path_{label}.join(sample_folder_path, output_filename)
+        output_path = os.path.join(sample_folder_path, output_filename)
 
         # Cancel if file already exists
         if os.path.exists(output_path):
