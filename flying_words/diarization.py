@@ -1,6 +1,6 @@
 from torch.hub import load
 from pyannote.database.util import load_rttm
-from flying_words.audio import Audio
+from audio import Audio
 
 class Diarization:
     def __init__(self, source: Audio, model='dia_dihard'):

@@ -1,7 +1,7 @@
 import os
-from flying_words.audio import Audio
-from flying_words.diarization import Diarization
-from flying_words.google import GoogleClient
+from audio import Audio
+from diarization import Diarization
+from google_client import GoogleClient
 import time
 
 #sudo apt install ffmpeg

@@ -1,11 +1,11 @@
 from genericpath import exists
 import os
-from flying_words.google import GoogleClient
+from google_client import GoogleClient
 import pydub
 from pydub import AudioSegment
 from copy import copy
 from google.cloud import storage
-from flying_words.utils import time_it
+from utils import time_it
 
 
 class Audio:
