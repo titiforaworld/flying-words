@@ -35,7 +35,7 @@ class Audio:
 
 
     @time_it
-    def export_sample(self, start: int, length: int):
+    def export_sample(self, start: int, length: int, label: str = 'unknown'):
         """Export a .wav sample from audio-source.
 
         Samples are kept in self.samples list.
@@ -48,8 +48,8 @@ class Audio:
 
         # Create output filepath
         sample_filename_suffix = f'_sample_{start}_{length}'
-        output_filename = f'{os.path.splitext(os.path.basename(self.filepath))[0]}{sample_filename_suffix}.wav'
-        output_path = os.path.join(sample_folder_path, output_filename)
+        output_filename = f'{os.path.splitext(os.path.basename(self.filepath))[0]}{sample_filename_suffix}_{label}.wav'
+        output_path = os.path_{label}.join(sample_folder_path, output_filename)
 
         # Cancel if file already exists
         if os.path.exists(output_path):
