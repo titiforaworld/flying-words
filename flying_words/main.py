@@ -2,7 +2,6 @@ import os
 from audio import Audio
 from diarization import Diarization
 from google_client import GoogleClient
-import time
 
 #sudo apt install ffmpeg
 
