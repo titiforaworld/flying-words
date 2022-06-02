@@ -44,7 +44,7 @@ count_lines:
 # ----------------------------------
 #      UPLOAD PACKAGE TO PYPI
 # ----------------------------------
-PYPI_USERNAME=<AUTHOR>
+PYPI_USERNAME=clement_decaux
 build:
 	@python setup.py sdist bdist_wheel
 
