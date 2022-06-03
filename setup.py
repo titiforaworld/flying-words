@@ -5,7 +5,7 @@ with open('requirements.txt') as f:
     content = f.readlines()
 requirements = [x.strip() for x in content if 'git+' not in x]
 
-setup(name='flying-words',
+setup(name='flying_words',
       version="1.0",
       description="Project Description",
       packages=find_packages(),
@@ -13,5 +13,5 @@ setup(name='flying-words',
       test_suite='tests',
       # include_package_data: to install data from MANIFEST.in
       include_package_data=True,
-      scripts=['scripts/flying-words-run'],
+      scripts=['scripts/flying_words-run'],
       zip_safe=False)

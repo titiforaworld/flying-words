@@ -20,7 +20,7 @@ class Audio:
         self.filepath = source
         self.root, self.format = os.path.splitext(self.filepath)
         self.segment = None
-        self.samples = []
+        self.samples_segment = []
 
 
     @time_it
@@ -66,11 +66,12 @@ class Audio:
         t_end = t_start + length * 1000
 
         # Extract sample part
-        self.samples.append(self.segment[t_start:t_end])
+        sample_segment = self.segment[t_start:t_end]
+        self.samples_segment.append(sample_segment)
 
         # Generate output file
         try:
-            sample = self.segment.export(output_path, format='wav')
+            sample = sample_segment.export(output_path, format='wav')
             print(f'{os.path.basename(output_path)}: File created')
             print('Sampling Succeeded')
         except Exception as e:

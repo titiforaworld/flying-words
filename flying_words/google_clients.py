@@ -35,3 +35,15 @@ class StorageClient:
         blob.download_to_filename(output_path)
 
         return blob
+
+    def upload_blob(self, blob_path: str, input_path: str = os.path.join('..', 'raw_data')):
+        """Upload a blob from the bucket."""
+
+
+        bucket = self.client.bucket(bucket_name)
+
+        blob = bucket.blob(blob_path)
+
+        blob.upload_from_filename(input_path)
+
+        return blob

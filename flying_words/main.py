@@ -40,8 +40,8 @@ blob_uri = 'gs://le-wagon-project-75667-antoine/data/16119-17.04.2022-ITEMA_2299
 output_path = os.path.join(data_raw_path, os.path.basename(blob_uri))
 gsClient.download_blob(blob_uri, output_path)
 
-# Diarization
-test_audio = Audio('/home/clement/code/titiforaworld/flying_words/raw_data/samples/16119-17.04.2022-ITEMA_22998007-2022C6119S0107-21_sample_0_600_unknown.wav')
-diarization = Diarization(source=test_audio)
-diarization.make_diarization()
-print(diarization.diarization_output())
+# # Diarization
+# test_audio = Audio('/home/clement/code/titiforaworld/flying_words/raw_data/samples/16119-17.04.2022-ITEMA_22998007-2022C6119S0107-21_sample_0_600_unknown.wav')
+# diarization = Diarization(source=test_audio)
+# diarization.make_diarization()
+# print(diarization.diarization_output())
