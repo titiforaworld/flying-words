@@ -5,7 +5,7 @@ from google.cloud import storage
 from google.oauth2 import service_account
 
 class StorageClient:
-    """A class for GCP Management."""
+    """A class for Google Storage Management."""
 
     def __init__(self, project: str, credentials: str):
         """Constructor for GoogleClient class."""
@@ -20,6 +20,7 @@ class StorageClient:
         bucket = self.client.bucket(bucket_name)
 
         return list(self.client.list_blobs(bucket_name))
+
 
     def download_blob(self, blob_uri: str, output_path: str = os.path.join('..', 'raw_data')):
         """Downloads a blob from the bucket."""
