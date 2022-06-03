@@ -54,7 +54,7 @@ python-multipart
 # pyannote.core
 # pyannote.pipeline
 # pyannote.metrics
-https://github.com/pyannote/pyannote-audio/archive/develop.zip
+git+https://github.com/pyannote/pyannote-audio/archive/develop.zip
 
 #audio
 pydub
