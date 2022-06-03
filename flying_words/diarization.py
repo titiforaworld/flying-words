@@ -3,12 +3,14 @@ from pyannote.audio import Pipeline
 from pyannote.database.util import load_rttm
 import speechbrain as sb
 from flying_words.audio import Audio
+import pandas as pd
 
 class Diarization:
     def __init__(self, source: Audio):
         self.source = source
         self.pipeline = Pipeline.from_pretrained("pyannote/speaker-diarization")
         self.diarization = None
+        self.diarization_df = None
 
 
     def make_diarization(self,
@@ -36,10 +38,20 @@ class Diarization:
         return self.diarization
 
 
-    def diarization_output(self):
+    def get_diarization_df(self):
 
-        output = []
+        segmentation = []
         for turn, _, speaker in self.diarization.itertracks(yield_label=True):
-            output.append(dict(speaker=speaker, turn_start=turn.start, turn_end=turn.end))
+            turn_start = round(turn.start,3)
+            turn_end = round(turn.end,3)
+            segmentation.append([speaker, turn_start, turn_end])
 
-        return output
+        def time_format(x):
+            return f'{int(x/60)}:{round(x%60,3)}'
+
+        self.diarization_df = pd.DataFrame(segmentation, columns=['speaker', 'start', 'end'])
+        self.diarization_df['start_format'] = self.diarization_df['start'].map(time_format)
+        self.diarization_df['end_format'] = self.diarization_df['end'].map(time_format)
+        self.diarization_df['segment_length'] = self.diarization_df['end'] - self.diarization_df['start']
+
+        return self.diarization_df
