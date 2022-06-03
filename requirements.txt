@@ -48,13 +48,6 @@ ffmpeg-python
 pytest-shutil
 python-multipart
 
-# pyannote
-# pyannote.audio
-# pyannote.database
-# pyannote.core
-# pyannote.pipeline
-# pyannote.metrics
-git+https://github.com/pyannote/pyannote-audio/archive/develop
 
 #audio
 pydub
