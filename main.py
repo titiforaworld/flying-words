@@ -1,7 +1,7 @@
 import os
-from audio import Audio
-from diarization import Diarization
-from google_clients import StorageClient
+from flying_words.audio import Audio
+from flying_words.diarization import Diarization
+from flying_words.google_clients import StorageClient
 
 #sudo apt install ffmpeg
 
@@ -10,7 +10,7 @@ print()
 # Set raw_data folder path
 main_path = os.path.abspath(__file__)
 main_dir = os.path.dirname(main_path)
-data_raw_path = os.path.join(main_dir, '..', 'raw_data')
+data_raw_path = os.path.join(main_dir, 'raw_data')
 
 # Retrieve all mp3 raw_files
 mp3_filepaths = []
@@ -39,6 +39,10 @@ blobs = gsClient.get_bucket_blobs(bucket_name)
 blob_uri = 'gs://le-wagon-project-75667-antoine/data/16119-17.04.2022-ITEMA_22998007-2022C6119S0107-21.mp3'
 output_path = os.path.join(data_raw_path, os.path.basename(blob_uri))
 gsClient.download_blob(blob_uri, output_path)
+
+# Upload blob
+input_path = '/home/clement/code/titiforaworld/flying_words/raw_data/001_test'
+gsClient.upload_blob(input_path, bucket_name, 'data/')
 
 # # Diarization
 # test_audio = Audio('/home/clement/code/titiforaworld/flying_words/raw_data/samples/16119-17.04.2022-ITEMA_22998007-2022C6119S0107-21_sample_0_600_unknown.wav')

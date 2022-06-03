@@ -2,7 +2,7 @@ from torch.hub import load
 from pyannote.audio import Pipeline
 from pyannote.database.util import load_rttm
 import speechbrain as sb
-from audio import Audio
+from flying_words.audio import Audio
 
 class Diarization:
     def __init__(self, source: Audio, model='dia_dihard'):
