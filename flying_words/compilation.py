@@ -20,11 +20,13 @@ class Compilation:
         self.sample_segments = query_job['gs_mp3_sample'][:]
         self.query_job = query_job
         self.start_show = None
+        self.path_to_episode = None
+        self.path_to_samples = None
 
     def get_compiled_audio(self, gsClient:StorageClient):
 
-        path_to_episode = '/content/drive/MyDrive/projetWagon/data/compilation_samples_episode/episodes'
-        path_to_samples = '/content/drive/MyDrive/projetWagon/data/compilation_samples_episode/samples'
+        self.path_to_episode = '/content/drive/MyDrive/projetWagon/data/compilation_samples_episode/episodes'
+        self.path_to_samples = '/content/drive/MyDrive/projetWagon/data/compilation_samples_episode/samples'
 
         # # Download blob
         blob_uri = self.episode_mp3_link
@@ -44,11 +46,11 @@ class Compilation:
         for s in range(len(self.sample_segments)):
             samples_names.append((dld_samples[s].name).split('/')[1])
 
-        path_episode = os.path.join(path_to_episode, episode_name)
+        path_episode = os.path.join(self.path_to_episode, episode_name)
 
         path_samples = []
         for n in range(len(samples_names)):
-            path_samples.append(os.path.join(path_to_samples, samples_names[n]))
+            path_samples.append(os.path.join(self.path_to_samples, samples_names[n]))
 
         Audio(path_episode).load_source()
 
@@ -61,7 +63,7 @@ class Compilation:
         path_episode = path_episode
         paths_to_combine = []
         for  i  in range(0, len(audio_samples_mp3)) :
-            paths_to_combine.append(f"{path_to_samples}/{samples_names[i]}")
+            paths_to_combine.append(f"{self.path_to_samples}/{samples_names[i]}")
 
         combined = AudioSegment.empty()
 
@@ -79,12 +81,3 @@ class Compilation:
 
     def get_known_ids(self):
         return list(self.known_ids)
-
-    def get_unknown_id(self):
-        return self.unknown_id
-
-    def get_episod_id(self):
-        return self.episode_id
-
-    def get_episod_start(self):
-        return self.start_show

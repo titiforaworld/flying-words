@@ -23,7 +23,6 @@ class Audio:
         self.filepath = source
         self.root, self.format = os.path.splitext(self.filepath)
         self.segment = self.load_source()
-        self.samples_segment = []
 
 
     def load_source(self):
@@ -33,6 +32,10 @@ class Audio:
             self.segment = AudioSegment.from_mp3(self.filepath)
         elif self.format == '.wav' :
             self.segment = AudioSegment.from_wav(self.filepath)
+
+        self.segment = self.segment.set_channels(1)
+        self.segment = self.segment.set_frame_rate(16000)
+
         return self.segment
 
 
@@ -68,7 +71,6 @@ class Audio:
 
         # Extract sample part
         sample_segment = self.segment[t_start:t_end]
-        self.samples_segment.append(sample_segment)
 
         sample_segment = sample_segment.set_channels(1)
         sample_segment = sample_segment.set_frame_rate(16000)
