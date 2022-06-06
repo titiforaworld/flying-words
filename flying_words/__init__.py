@@ -1,8 +1,11 @@
-from os.path import isfile
-from os.path import dirname
+import os
+from dotenv import load_dotenv
 
-version_file = '{}/version.txt'.format(dirname(__file__))
+version_file = '{}/version.txt'.format(os.path.dirname(__file__))
 
-if isfile(version_file):
+if os.path.isfile(version_file):
     with open(version_file) as version_file:
         __version__ = version_file.read().strip()
+
+env_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), '.env')
+load_dotenv(dotenv_path=env_path)

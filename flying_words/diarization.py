@@ -17,13 +17,13 @@ class Diarization:
                          onset: float = 0.8,
                          offset: float = 0.4,
                          min_duration_on: float = 10.0,
-                         min_duration_off: float = 0.0):
+                         min_duration_off: float = 2.0):
         """Process diarization on audio-souce.
 
         onset=0.6: mark region as active when probability goes above 0.6
         offset=0.4: switch back to inactive when probability goes below 0.4
         min_duration_on=0.0: remove active regions shorter than that many seconds
-        min_duration_off=0.0: fill inactive regions shorter than that many seconds
+        min_duration_off=2.0: fill inactive regions shorter than that many seconds
         """
 
         initial_params = {"onset": onset,
@@ -47,7 +47,7 @@ class Diarization:
             segmentation.append([speaker, turn_start, turn_end])
 
         def time_format(x):
-            return f'{int(x/60)}:{round(x%60,3)}'
+            return f'{int(x / 60)}:{round(x % 60, 3)}'
 
         self.diarization_df = pd.DataFrame(segmentation, columns=['speaker', 'start', 'end'])
         self.diarization_df['start_format'] = self.diarization_df['start'].map(time_format)

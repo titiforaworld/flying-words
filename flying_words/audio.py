@@ -22,11 +22,10 @@ class Audio:
 
         self.filepath = source
         self.root, self.format = os.path.splitext(self.filepath)
-        self.segment = None
+        self.segment = self.load_source()
         self.samples_segment = []
 
 
-    @time_it
     def load_source(self):
         """Load audio-source as AudioSegment."""
 
@@ -37,7 +36,6 @@ class Audio:
         return self.segment
 
 
-    @time_it
     def export_sample(self, start: int, length: int, label: str = 'unknown'):
         """Export a .wav sample from audio-source.
 
@@ -58,7 +56,7 @@ class Audio:
         if os.path.exists(output_path):
             print(f'{os.path.basename(output_path)}: File already exists')
             print('Sampling Canceled')
-            return None
+            return Audio(output_path)
 
         # load_source
         if not self.segment:
@@ -72,17 +70,20 @@ class Audio:
         sample_segment = self.segment[t_start:t_end]
         self.samples_segment.append(sample_segment)
 
+        sample_segment = sample_segment.set_channels(1)
+        sample_segment = sample_segment.set_frame_rate(16000)
+
         # Generate output file
         try:
-            sample = sample_segment.export(output_path, format='wav')
+            sample_segment.export(output_path, format='wav')
             print(f'{os.path.basename(output_path)}: File created')
             print('Sampling Succeeded')
         except Exception as e:
             print(f'Sampling Aborted : {e}')
 
-        return sample
+        return Audio(output_path)
 
-    @time_it
+
     def export_conversion(self, format: str):
         """Export a conversion of audio-source in a given format."""
 
@@ -92,7 +93,7 @@ class Audio:
         if os.path.exists(output_path):
             print(f'{os.path.basename(output_path)}: File already exists')
             print('Conversion Canceled')
-            return None
+            return Audio(output_path)
 
         # load_source
         if not self.segment:
@@ -105,10 +106,10 @@ class Audio:
 
         # Conversion
         try:
-            conversion = segment_to_convert.export(output_path, format=format)
+            segment_to_convert.export(output_path, format=format)
             print(f'{os.path.basename(output_path)}: File created')
             print('Conversion Succeeded')
         except Exception as e:
             print(f'Conversion Aborted : {e}')
 
-        return conversion
+        return Audio(output_path)
