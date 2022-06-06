@@ -72,9 +72,9 @@ class Compilation:
 
         self.start_show = combined.duration_seconds
 
-        audio_full.export(f"/content/drive/MyDrive/projetWagon/data/compilation_samples_episode/outputs/{episode_name}.mp3", format="mp3")
+        audio_full.export(f"/content/drive/MyDrive/projetWagon/data/compilation_samples_episode/outputs/{episode_name}.wav", format="wav")
 
-        return audio_full
+        return Audio(f"/content/drive/MyDrive/projetWagon/data/compilation_samples_episode/outputs/{episode_name}.wav")
 
 
     def get_known_ids(self):
