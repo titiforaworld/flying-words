@@ -29,11 +29,14 @@ class Audio:
         """Load audio-source as AudioSegment."""
 
         if self.format == '.mp3':
-            segment = AudioSegment.from_mp3(self.filepath)
+            self.segment = AudioSegment.from_mp3(self.filepath)
         elif self.format == '.wav' :
-            segment = AudioSegment.from_wav(self.filepath)
+            self.segment = AudioSegment.from_wav(self.filepath)
 
-        return self.segment.set_channels(1).set_frame_rate(16000)
+        self.segment = self.segment.set_channels(1)
+        self.segment = self.segment.set_frame_rate(16000)
+
+        return self.segment
 
 
     def export_sample(self, start: int, length: int, label: str = 'unknown'):
