@@ -39,9 +39,9 @@ class ApiRadioFrance:
 
         #convert day to unixtime
             ## beginning ==> midnight
-        start_date_epoch = today - timedelta(days=1)
+        start_date_epoch = int((today - timedelta(days=1)).timestamp())
                ## beginning+ 24h
-        end_date_epoch= today - timedelta(seconds=1)
+        end_date_epoch= int((today - timedelta(seconds=1)).timestamp())
 
         #query to retrieve grid info from API
         query_grid_emission = """query {
