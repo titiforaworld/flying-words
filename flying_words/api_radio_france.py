@@ -98,13 +98,13 @@ class ApiRadioFrance:
 
         emission =[]
         for i in range(len(episode)) :
-            if  "diffusion" in " ".join(list(episode[i].keys())):
-                emission.append(pd.DataFrame.from_dict(episode[i]["diffusion"]).loc["url"])
+            if  "diffusion" in " ".join(list(episode[i].keys())) :
+                emission.append(pd.Series(episode[i]["diffusion"], index=episode[i]["diffusion"].keys()))
 
         emission_df=pd.DataFrame(emission)
 
         ## creation of a dataframe without nonetype
-        emission_df_none=emission_df.drop(index="url")
+        emission_df_none=pd.DataFrame(columns=emission_df.columns )
 
 
         for j in range(emission_df.shape[0])  :
