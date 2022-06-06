@@ -48,10 +48,6 @@ ffmpeg-python
 pytest-shutil
 python-multipart
 
-# pyannote
-pyannote.audio
-pyannote.database
-pyannote.core
 
 #audio
 pydub
@@ -59,3 +55,16 @@ wave
 
 #azure
 azure.cognitiveservices.speech
+
+#google
+google-cloud-speech
+google-cloud-storage
+google-cloud-bigquery
+
+#
+protobuf==3.19.0
+
+#
+speechbrain
+
+db-dtypes
