@@ -1,5 +1,5 @@
 import time
-import datetime
+from datetime import datetime, timedelta
 import requests
 import pandas as pd
 
@@ -30,18 +30,18 @@ class ApiRadioFrance:
    # def get_emission_url(url : str):
   #    return url[:url.rfind('/')]
 
-    def get_grid_emission(self,year:int , month :int, day:int, station_name="FRANCECULTURE"):
+    def get_yesterday_grid(self, station_name="FRANCECULTURE"):
         """ retrieve grid information for 24h for a day and a station name
 
         """
-        d = datetime.date(year,month,day)
+        today=datetime.today().replace(hour=0, minute=0, second=0, microsecond=0)
 
 
         #convert day to unixtime
             ## beginning ==> midnight
-        unixtime_beginning = int(time.mktime(d.timetuple()))
+        start_date_epoch = today - timedelta(days=1)
                ## beginning+ 24h
-        unixtime_end_24h= int(unixtime_beginning+86400)
+        end_date_epoch= today - timedelta(second=1)
 
         #query to retrieve grid info from API
         query_grid_emission = """query {
@@ -84,8 +84,8 @@ class ApiRadioFrance:
     }
     """
         #replace parameters in the query
-        query_grid_emission=query_grid_emission.replace("unixtime_beginning",str(unixtime_beginning))
-        query_grid_emission= query_grid_emission.replace("unixtime_end_24h",str(unixtime_end_24h))
+        query_grid_emission=query_grid_emission.replace("unixtime_beginning",str(start_date_epoch))
+        query_grid_emission= query_grid_emission.replace("unixtime_end_24h",str(end_date_epoch))
         query_grid_emission= query_grid_emission.replace("station_name",str(station_name))
 
         #query to the API
@@ -118,7 +118,7 @@ class ApiRadioFrance:
 
 
         #create a grid date column
-        emission_df_none["grid_date"]=d
+        emission_df_none["grid_date"]=start_date_epoch
 
         return emission_df_none
 
