@@ -17,7 +17,7 @@ class Diarization:
                          onset: float = 0.8,
                          offset: float = 0.4,
                          min_duration_on: float = 10.0,
-                         min_duration_off: float = 2.0):
+                         min_duration_off: float = 1.0):
         """Process diarization on audio-souce.
 
         onset=0.6: mark region as active when probability goes above 0.6
