@@ -37,11 +37,11 @@ class Speaker:
         else:
             self.other_speakers = self.audio_speakers[-others_count:]
 
+        # create dictionary to match segmented speakers & speaker list
+        self.speakers_mapping = dict(zip(self.speaker_ids, self.audio_speakers))
+
         # When we have 1 speaker not identified by diarization, and we have his ID
         if others_count == 1 :
-
-        # create dictionary to match segmented speakers & speaker list
-            self.speakers_mapping = dict(zip(self.speaker_ids, self.audio_speakers))
 
             # get all segments of unknown speaker in descending order by length
             unkown_speaker_segments = diarization_df[diarization_df["speaker"] == self.speakers_mapping[unknown_id]].sort_values(['segment_length'],ascending=False)
@@ -65,10 +65,6 @@ class Speaker:
                     total_length += unkown_speaker_segments.iloc[tracker, unkown_speaker_segments.columns.get_loc('segment_length')]
                     tracker += 1
                     # comment gérer si tracker > nb de ligne du df ?
-
-            return others_count, unknown_dicts
-            # if others_count = 1 => 1 unknown, with provided label
-            # if others_count > 0 => nb of 'real' unknown
 
             # When we have more than 1 speaker not identified by diarization, then we consider all "new" speakers as "unknown" (even the one with label)
 
@@ -100,7 +96,7 @@ class Speaker:
         # create dictionary to match segmented speakers & speaker list
         self.otherIDs_mapping = dict(zip(self.other_IDs, self.other_speakers))
 
-        return others_count, unknown_dicts, self.otherIDs_mapping, self.other_IDs, self.other_speakers
+        return others_count, unknown_dicts
         # if others_count = 1 => 1 unknown, with provided label
         # if others_count > 0 => nb of 'real' unknown
 
