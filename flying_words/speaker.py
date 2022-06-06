@@ -120,12 +120,18 @@ class Speaker:
         # set timestamps to 'real' episod start (withouth voice extracts)
         df_rtrt['rtrt_start'] = df_rtrt['start'].map(lambda x : x - start_ep)
         df_rtrt['rtrt_end'] = df_rtrt['end'].map(lambda x : x - start_ep)
-
-        # add a column with episod ID
-        df_rtrt['episod_id'] = episod_id
+        # drop columns 'start', 'end'
+        df_rtrt.drop(['start', 'end'], axis=1)
 
         # add a column with speaker status : known (voice sample with lable in library), unknown (voice sample wihtout label)
         df_rtrt['speaker_status'] = df_rtrt['speaker'].copy()
         df_rtrt['speaker_status'] = df_rtrt['speaker_status'].apply(lambda x : 'known' if x in self.speaker_ids else "unknown")
+
+        # add a column with episod ID
+        df_rtrt['episod_id'] = episod_id
+
+        # re-order columns
+        column_names = ["episod_id", "speaker", "speaker_status", "rtrt_start", "rtrt_end", "segment_length"]
+        df_rtrt = df_rtrt.reindex(columns=column_names)
 
         return df_rtrt
