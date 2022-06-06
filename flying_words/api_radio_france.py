@@ -4,19 +4,6 @@ import requests
 import pandas as pd
 
 
-
-from flying_words.google_clients import BigQueryClient
-# Variables for GCP
-project_name = 'intense-elysium-346915'
-bucket_name = 'le-wagon-project-75667-antoine'
-credential_path = '/content/drive/MyDrive/projetWagon/env/intense-elysium-346915-f2127c89e62b.json'
-
-# Instanciate google client
-BQClient =  BigQueryClient(project_name, credential_path)
-
-
-
-
 class ApiRadioFrance:
     """A class for retrieving information from Radio France API"""
 
@@ -27,49 +14,41 @@ class ApiRadioFrance:
         self.endpoint = f"https://openapi.radiofrance.fr/v1/graphql?x-token={self.access_token}"
 
 
-   # def get_emission_url(url : str):
-  #    return url[:url.rfind('/')]
-
     def get_yesterday_grid(self, station_name="FRANCECULTURE"):
-        """ retrieve grid information for 24h for a day and a station name
+        """Retrieve previous day grid information for a given radio station."""
 
-        """
-        today=datetime.today().replace(hour=0, minute=0, second=0, microsecond=0)
-
-
-        #convert day to unixtime
-            ## beginning ==> midnight
+        # Get previous day time window
+        today = datetime.today().replace(hour=0, minute=0, second=0, microsecond=0)
         start_date_epoch = int((today - timedelta(days=1)).timestamp())
-               ## beginning+ 24h
         end_date_epoch= int((today - timedelta(seconds=1)).timestamp())
 
         #query to retrieve grid info from API
-        query_grid_emission = """query {
-      paginatedGrid(start: unixtime_beginning, end: unixtime_end_24h, station: station_name) {
-        cursor
-        node {
-          steps {
-            ... on DiffusionStep {
-              id
-              diffusion {
-                id
-                title
-                standFirst
-                url
-                published_date
-                podcastEpisode {
-                  id
-                  title
-                  url
-                  created
-                  duration
-                }
-              }
-            }
-            ... on TrackStep {
-              id
-              track {
-                id
+        query_yesterday_grid = """query {
+            paginatedGrid(start: TAG_START_DATE_EPOCH, end: TAG_END_DATE_EPOCH, station: TAG_STATION_NAME) {
+                cursor
+                node {
+                    steps {
+                        ... on DiffusionStep {
+                            id
+                            diffusion {
+                                id
+                                title
+                                standFirst
+                                url
+                                published_date
+                                podcastEpisode {
+                                    id
+                                    title
+                                    url
+                                    created
+                                    duration
+                                }
+                            }
+                        }
+                        ... on TrackStep {
+                            id
+                            track {
+                                id
                 title
                 albumTitle
               }
@@ -81,46 +60,43 @@ class ApiRadioFrance:
           }
         }
       }
-    }
-    """
-        #replace parameters in the query
-        query_grid_emission=query_grid_emission.replace("unixtime_beginning",str(start_date_epoch))
-        query_grid_emission= query_grid_emission.replace("unixtime_end_24h",str(end_date_epoch))
-        query_grid_emission= query_grid_emission.replace("station_name",str(station_name))
+    }"""
 
-        #query to the API
-        r4 = requests.post(self.endpoint, json={"query": query_grid_emission})
+        query_yesterday_grid = query_yesterday_grid.replace("TAG_START_DATE_EPOCH",str(start_date_epoch)) \
+                                                   .replace("TAG_END_DATE_EPOCH",str(end_date_epoch)) \
+                                                   .replace("TAG_STATION_NAME",str(station_name))
 
+        # Query the API
+        response = requests.post(self.endpoint, json={"query": query_yesterday_grid})
 
-        episode= r4.json()["data"]["paginatedGrid"]["node"]["steps"]
+        diffusions_json = response.json()["data"]["paginatedGrid"]["node"]["steps"]
 
-        #start to transform response from API to Dataframe
+        # Transform response from API to Dataframe
+        diffusions = []
+        for diffusion in diffusions_json:
+            if "diffusion" in " ".join(list(diffusion.keys())) :
+                diffusions.append(pd.Series(diffusion["diffusion"], index=diffusion["diffusion"].keys()))
 
-        emission =[]
-        for i in range(len(episode)) :
-            if  "diffusion" in " ".join(list(episode[i].keys())) :
-                emission.append(pd.Series(episode[i]["diffusion"], index=episode[i]["diffusion"].keys()))
+        diffusions_df = pd.DataFrame(diffusions)
+        diffusions_df.dropna(subset=['url'], inplace=True)
 
-        emission_df=pd.DataFrame(emission)
+        # ## creation of a dataframe without nonetype
+        # emission_df_none=pd.DataFrame(columns=diffusions_df.columns)
+        # for j in range(diffusions_df.shape[0])  :
+        #     if diffusions_df["url"][j]!= None:
+        #         emission_df_none=emission_df_none.append(diffusions_df.iloc[j], ignore_index=True)
 
-        ## creation of a dataframe without nonetype
-        emission_df_none=pd.DataFrame(columns=emission_df.columns )
+        # Get show URL from diffusion URL
+        def get_show_url(url : str):
+            return url[:url.rfind('/')]
 
+        diffusions_df["show_url"] = diffusions_df["url"].map(get_show_url)
 
-        for j in range(emission_df.shape[0])  :
-            if emission_df["url"][j]!= None:
-                emission_df_none=emission_df_none.append( emission_df.iloc[j], ignore_index=True)
+        # Create a grid date column
+        diffusions_df["grid_date"] = start_date_epoch
 
-        #get emission url thanks to episode url
-        def get_emission_url(url : str):
-          return url[:url.rfind('/')]
-        emission_df_none["url_emission"]=emission_df_none["url"].map(get_emission_url)
+        return diffusions_df
 
-
-        #create a grid date column
-        emission_df_none["grid_date"]=start_date_epoch
-
-        return emission_df_none
 
     def get_episodes_to_df(self,url,bqClient):
         '''

@@ -57,8 +57,7 @@ class Audio:
 
         # Cancel if file already exists
         if os.path.exists(output_path):
-            print(f'{os.path.basename(output_path)}: File already exists')
-            print('Sampling Canceled')
+            print(f'{os.path.basename(output_path)}: File already exists. Loading it.')
             return Audio(output_path)
 
         # load_source
@@ -93,8 +92,7 @@ class Audio:
 
         # Cancel if file already exists
         if os.path.exists(output_path):
-            print(f'{os.path.basename(output_path)}: File already exists')
-            print('Conversion Canceled')
+            print(f'{os.path.basename(output_path)}: File already exists. Loading it.')
             return Audio(output_path)
 
         # load_source
