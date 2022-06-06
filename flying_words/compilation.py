@@ -20,6 +20,8 @@ class Compilation:
         self.sample_segments = query_job['gs_mp3_sample'][:]
         self.query_job = query_job
         self.start_show = None
+        self.path_to_episode = None
+        self.path_to_samples = None
 
     def get_compiled_audio(self, gsClient:StorageClient):
 
