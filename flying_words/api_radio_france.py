@@ -41,7 +41,7 @@ class ApiRadioFrance:
             ## beginning ==> midnight
         start_date_epoch = today - timedelta(days=1)
                ## beginning+ 24h
-        end_date_epoch= today - timedelta(second=1)
+        end_date_epoch= today - timedelta(seconds=1)
 
         #query to retrieve grid info from API
         query_grid_emission = """query {
