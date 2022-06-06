@@ -4,9 +4,8 @@ import requests
 import pandas as pd
 
 
-from flying_words.audio import Audio
-from flying_words.google_clients import BigQueryClient, StorageClient
 
+from flying_words.google_clients import BigQueryClient
 # Variables for GCP
 project_name = 'intense-elysium-346915'
 bucket_name = 'le-wagon-project-75667-antoine'
@@ -123,7 +122,7 @@ class ApiRadioFrance:
 
         return emission_df_none
 
-    def get_episodes_to_df(self,url):
+    def get_episodes_to_df(self,url,bqClient):
         '''
         for a given show url - query the open API and get the last 10th episodes
         return a dictionnary containing to dataframe
@@ -203,8 +202,8 @@ class ApiRadioFrance:
         df_emission["lien_mp3_google_storage"]="to be filled"
 
         ###filter to avoid uploading existing episode
-        BQClient =  BigQueryClient(project_name, credential_path)
-        existing_id=BQClient.get_table("flying_words", "episode")["id"].unique()
+
+        existing_id=bqClient.get_table("flying_words", "episode")["id"].unique()
 
 
         df_emission=df_emission[df_emission.id.isin(existing_id)==False]
