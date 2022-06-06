@@ -70,7 +70,7 @@ class Compilation:
 
         audio_full = combined + AudioSegment.from_file(path_episode, format='mp3')
 
-        self.start_show = audio_full.duration_seconds - combined.duration_seconds
+        self.start_show = combined.duration_seconds
 
         audio_full.export(f"/content/drive/MyDrive/projetWagon/data/compilation_samples_episode/outputs/{episode_name}.mp3", format="mp3")
 
