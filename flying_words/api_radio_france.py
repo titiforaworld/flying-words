@@ -188,7 +188,7 @@ class ApiRadioFrance:
 
 
             #### DF guest
-            dfguest= pd.DataFrame(columns={"relation", "episode_id" ,"name","info"})
+            dfguest= pd.DataFrame(columns={"relation", "episode_id" ,"name","name_id","info"})
             for i in range(len(episodes)) :
                 episode_id = episodes[i]["node"]["id"]
                 episode_perso=  episodes[i]["node"]["personalitiesConnection"]["edges"]
@@ -197,6 +197,7 @@ class ApiRadioFrance:
                         "relation": episode_perso[j]["relation"],
                         "episode_id":episode_id,
                         "name":episode_perso[j]["node"]["name"],
+                        "name_id":episode_perso[j]["node"]["id"],
                         "info":episode_perso[j]["info"]}
                     guest_series = pd.Series(dict_new,name="personality")
                     dfguest=dfguest.append(guest_series,ignore_index=True)
