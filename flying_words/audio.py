@@ -140,30 +140,36 @@ def merge_diffusion_with_samples(target_response: pd.DataFrame, gsClient:Storage
             sample_path = os.path.join(samples_folder, os.path.basename(sample_blob_uri))
             gsClient.download_blob(sample_blob_uri, sample_path)
             sample_audios.append(Audio(sample_path).export_conversion('wav'))
+
+
+        # Samples Merging
+        merged_audio = AudioSegment.empty()
+        for sample_audio in sample_audios:
+            merged_audio = merged_audio + sample_audio
+
+        # Get samples time offset
+        show_start = merged_audio.duration_seconds
+
+        # Add diffusion to merged audio
+        merged_audio = merged_audio + diffusion_audio
+
+        # Export merged audio
+        merge_filename = os.path.splitext(os.path.basename(diffusion_blob_uri))[0]
+        merge_path = os.path.join(merge_folder, f'{merge_filename}.wav')
+        merged_audio.export(merge_path, format="wav")
+
+        merged_audio_info = dict(episode_id=episode_id,
+                                    known_ids=known_ids,
+                                    unknown_id=unknown_id,
+                                    merged_audio=Audio(merge_path),
+                                    show_start=show_start,
+                                    diffusion_audio=diffusion_audio)
+
     else:
-        sample_audios = []
-
-    # Samples Merging
-    merged_audio = AudioSegment.empty()
-    for sample_audio in sample_audios:
-        merged_audio += sample_audio
-
-    # Get samples time offset
-    show_start = merged_audio.duration_seconds
-
-    # Add diffusion to merged audio
-    merged_audio += diffusion_audio
-
-    # Export merged audio
-    merge_filename = os.path.splitext(os.path.basename(diffusion_blob_uri))[0]
-    merge_path = os.path.join(merge_folder, f'{merge_filename}.wav')
-    merged_audio.export(merge_path, format="wav")
-
-    merged_audio_info = dict(episode_id=episode_id,
-                                known_ids=known_ids,
-                                unknown_id=unknown_id,
-                                merged_audio=Audio(merge_path),
-                                show_start=show_start,
-                                diffusion_audio=diffusion_audio)
+        merged_audio_info = dict(episode_id=episode_id,
+                                    known_ids=known_ids,
+                                    unknown_id=unknown_id,
+                                    show_start=show_start,
+                                    diffusion_audio=diffusion_audio)
 
     return merged_audio_info
