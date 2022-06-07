@@ -29,7 +29,7 @@ class StorageClient:
         return list(self.client.list_blobs(bucket_name))
 
 
-    def download_blob(self, blob_uri: str, output_path: str = os.path.join('..', 'raw_data')):
+    def download_blob(self, blob_uri: str, output_path: str):
         """Downloads a blob from the bucket."""
 
         blob_uri_pattern = r'gs:\/\/([^\/]*)\/(.*)'
