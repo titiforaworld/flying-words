@@ -14,12 +14,12 @@ class ApiRadioFrance:
         self.endpoint = f"https://openapi.radiofrance.fr/v1/graphql?x-token={self.access_token}"
 
 
-    def get_yesterday_grid(self, station_name="FRANCECULTURE"):
+    def get_yesterday_grid(self, station_name="FRANCECULTURE", previous_day=1):
         """Retrieve previous day grid information for a given radio station."""
 
         # Get previous day time window
         today = datetime.today().replace(hour=0, minute=0, second=0, microsecond=0)
-        start_date_epoch = int((today - timedelta(days=1)).timestamp())
+        start_date_epoch = int((today - timedelta(days=previous_day)).timestamp())
         end_date_epoch= int((today - timedelta(seconds=1)).timestamp())
 
         #query to retrieve grid info from API
