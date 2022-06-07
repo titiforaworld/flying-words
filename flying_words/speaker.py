@@ -97,6 +97,8 @@ class Speaker:
                         self.other_IDs.append(other_id)
                         total_length += id_speaker_segments.iloc[tracker, id_speaker_segments.columns.get_loc('segment_length')]
                         tracker += 1
+                        if tracker > id_speaker_segments.shape[0]:
+                            break
         # create dictionary to match segmented speakers & speaker list
         self.otherIDs_mapping = dict(zip(self.other_IDs, self.other_speakers))
 
