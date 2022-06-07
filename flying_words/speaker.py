@@ -93,11 +93,12 @@ class Speaker:
                         timestamp_unknown = id_speaker_segments.iloc[tracker, id_speaker_segments.columns.get_loc('start')]
                         length_unknown = id_speaker_segments.iloc[tracker, id_speaker_segments.columns.get_loc('segment_length')]
                         dict_id = [{'unknown_id' :other_id, 'timestamp' : timestamp_unknown, 'length' : length_unknown }]
-                        self.unknown_dicts.extend(dict_id)
-                        self.other_IDs.append(other_id)
                         total_length += id_speaker_segments.iloc[tracker, id_speaker_segments.columns.get_loc('segment_length')]
                         tracker += 1
-                        if tracker > id_speaker_segments.shape[0]:
+                        if tracker < id_speaker_segments.shape[0]:
+                            self.unknown_dicts.extend(dict_id)
+                            self.other_IDs.append(other_id)
+                        else:
                             break
         # create dictionary to match segmented speakers & speaker list
         self.otherIDs_mapping = dict(zip(self.other_IDs, self.other_speakers))
