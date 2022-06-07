@@ -8,3 +8,4 @@ raw_data/
 .env
 *.mp3
 *.wav
+.vscode
