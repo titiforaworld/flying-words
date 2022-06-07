@@ -104,9 +104,9 @@ class BigQueryClient:
         query = f"""
             UPDATE `{self.project}.{dataset}.{table_name}`
             SET {column} = '{new_value}'
-            WHERE {column_condition} = {value_condition}
+            WHERE {column_condition} = '{value_condition}'
             """
-
+        print(query)
         job = self.client.query(query)
 
         job.result()
