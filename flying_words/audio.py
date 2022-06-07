@@ -170,6 +170,7 @@ def merge_diffusion_with_samples(target_response: pd.DataFrame, gsClient:Storage
                                     known_ids=known_ids,
                                     unknown_id=unknown_id,
                                     merged_audio=diffusion_audio,
+                                    show_start=0,
                                     diffusion_audio=diffusion_audio)
 
     return merged_audio_info
