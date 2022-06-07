@@ -126,6 +126,7 @@ def merge_diffusion_with_samples(target_response: pd.DataFrame, gsClient:Storage
     samples_folder = '/content/drive/MyDrive/projetWagon/data/compilation_samples_episode/samples' # TODO
     merge_folder = '/content/drive/MyDrive/projetWagon/data/compilation_samples_episode/merges' # TODO
 
+
     # Download diffusion blob
     diffusion_path = os.path.join(episode_folder, os.path.basename(diffusion_blob_uri))
     gsClient.download_blob(diffusion_blob_uri, diffusion_path)
@@ -133,10 +134,12 @@ def merge_diffusion_with_samples(target_response: pd.DataFrame, gsClient:Storage
 
     # Retrieve samples information and download blob
     sample_audios = []
-    for sample_blob_uri in sample_blobs_uri:
-        sample_path = os.path.join(samples_folder, os.path.basename(sample_blob_uri))
-        gsClient.download_blob(sample_blob_uri, sample_path)
-        sample_audios.append(Audio(sample_path).export_conversion('wav'))
+
+    if sample_blobs_uri != None:
+        for sample_blob_uri in sample_blobs_uri:
+            sample_path = os.path.join(samples_folder, os.path.basename(sample_blob_uri))
+            gsClient.download_blob(sample_blob_uri, sample_path)
+            sample_audios.append(Audio(sample_path).export_conversion('wav'))
 
     # Samples Merging
     merged_audio = AudioSegment.empty()
@@ -158,6 +161,7 @@ def merge_diffusion_with_samples(target_response: pd.DataFrame, gsClient:Storage
                                 known_ids=known_ids,
                                 unknown_id=unknown_id,
                                 merged_audio=Audio(merge_path),
-                                show_start=show_start)
+                                show_start=show_start,
+                                diffusion_audio=diffusion_audio)
 
     return merged_audio_info
