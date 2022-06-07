@@ -135,7 +135,7 @@ def merge_diffusion_with_samples(target_response: pd.DataFrame, gsClient:Storage
     # Retrieve samples information and download blob
     sample_audios = []
 
-    if len(sample_blobs_uri):
+    if sample_blobs_uri.all():
         for sample_blob_uri in sample_blobs_uri:
             sample_path = os.path.join(samples_folder, os.path.basename(sample_blob_uri))
             gsClient.download_blob(sample_blob_uri, sample_path)
