@@ -69,6 +69,7 @@ class ApiRadioFrance:
         # Query the API
         response = requests.post(self.endpoint, json={"query": query_yesterday_grid})
 
+
         diffusions_json = response.json()["data"]["paginatedGrid"]["node"]["steps"]
 
         # Transform response from API to Dataframe
@@ -96,6 +97,7 @@ class ApiRadioFrance:
         diffusions_df["grid_date"] = start_date_epoch
 
         return diffusions_df
+
 
 
     def get_episodes_to_df(self,url,bqClient):
@@ -168,37 +170,39 @@ class ApiRadioFrance:
         query_4=query_4.replace("url_to_replace",url)
         endpoint = self.endpoint
 
+        try :
+            r4 = requests.post(endpoint, json={"query": query_4})
+            episodes =r4.json()['data']["showByUrl"]["diffusionsConnection"]["edges"]
+            emission=[pd.DataFrame.from_dict(episodes[i]["node"]).iloc[0] for i in range(len(episodes))]
+            nom_emission=[pd.DataFrame.from_dict(episodes[i]["node"]).iloc[1]["podcastEpisode"] for i in range(len(episodes))]
+            df_emission=pd.DataFrame(emission)
+            df_emission["nom_emission"]=nom_emission
+            df_emission["lien_mp3_google_storage"]="to be filled"
 
-        r4 = requests.post(endpoint, json={"query": query_4})
-        episodes =r4.json()['data']["showByUrl"]["diffusionsConnection"]["edges"]
-        emission=[pd.DataFrame.from_dict(episodes[i]["node"]).iloc[0] for i in range(len(episodes))]
-        nom_emission=[pd.DataFrame.from_dict(episodes[i]["node"]).iloc[1]["podcastEpisode"] for i in range(len(episodes))]
-        df_emission=pd.DataFrame(emission)
-        df_emission["nom_emission"]=nom_emission
-        df_emission["lien_mp3_google_storage"]="to be filled"
+            ###filter to avoid uploading existing episode
 
-        ###filter to avoid uploading existing episode
-
-        existing_id=bqClient.get_table("flying_words", "episode")["id"].unique()
-
-
-        df_emission=df_emission[df_emission.id.isin(existing_id)==False]
+            existing_id=bqClient.get_table("flying_words", "episode")["id"].unique()
 
 
-        #### DF guest
-        dfguest= pd.DataFrame(columns={"relation", "episode_id" ,"name","info"})
-        for i in range(len(episodes)) :
-            episode_id = episodes[i]["node"]["id"]
-            episode_perso=  episodes[i]["node"]["personalitiesConnection"]["edges"]
-            for j in range(len(episode_perso)):
-                dict_new= {
-                    "relation": episode_perso[j]["relation"],
-                    "episode_id":episode_id,
-                    "name":episode_perso[j]["node"]["name"],
-                    "info":episode_perso[j]["info"]}
-                guest_series = pd.Series(dict_new,name="personality")
-                dfguest=dfguest.append(guest_series,ignore_index=True)
+            df_emission=df_emission[df_emission.id.isin(existing_id)==False]
 
-        dfguest=dfguest[dfguest.episode_id.isin(existing_id)==False]
 
-        return  {"df_emission": df_emission, "df_guest":dfguest}
+            #### DF guest
+            dfguest= pd.DataFrame(columns={"relation", "episode_id" ,"name","info"})
+            for i in range(len(episodes)) :
+                episode_id = episodes[i]["node"]["id"]
+                episode_perso=  episodes[i]["node"]["personalitiesConnection"]["edges"]
+                for j in range(len(episode_perso)):
+                    dict_new= {
+                        "relation": episode_perso[j]["relation"],
+                        "episode_id":episode_id,
+                        "name":episode_perso[j]["node"]["name"],
+                        "info":episode_perso[j]["info"]}
+                    guest_series = pd.Series(dict_new,name="personality")
+                    dfguest=dfguest.append(guest_series,ignore_index=True)
+
+            dfguest=dfguest[dfguest.episode_id.isin(existing_id)==False]
+
+            return  {"df_emission": df_emission, "df_guest":dfguest}
+        except :
+            None
