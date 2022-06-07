@@ -77,7 +77,7 @@ class Speaker:
             # get longest segment
             self.unknown_dicts = []
             for id in self.other_speakers :
-                id_speaker_segments = diarization_df[diarization_df["speaker"] == id].sort_values(['segment_length'],ascending=False)
+                id_speaker_segments = diarization_df[diarization_df["name_id"] == id].sort_values(['segment_length'],ascending=False)
                 if id_speaker_segments.iloc[0, id_speaker_segments.columns.get_loc('segment_length')] > 60: # only for speakers with segments longer than 60 seconds
                     length_unknown = 60
                     timestamp_unknown = id_speaker_segments.iloc[0, id_speaker_segments.columns.get_loc('start')]
