@@ -25,8 +25,12 @@ class Speaker:
         self.others_count = None
         self.unknown_dicts = []
 
-    def get_unknown_info(self, diarization_df: pd.DataFrame, known_ids, unknown_id):
+    def get_unknown_info(self, diarization_df: pd.DataFrame, merged_diffusion_info):
         '''Provide information (timestamp, extract length & label) to extract audio sample of unknown speaker(s).'''
+
+        known_ids = merged_diffusion_info['known_ids']
+        unknown_id = merged_diffusion_info['unknown_id']
+
         # clear known_ids list in case of no sample (empty list)
         if None in known_ids:
             known_ids = []
@@ -102,19 +106,19 @@ class Speaker:
                         else:
                             break
                     self.other_IDs.append(other_id)
+
         # create dictionary to match segmented speakers & speaker list
         self.otherIDs_mapping = dict(zip(self.other_IDs, self.other_speakers))
 
 
-        # if others_count = 1 => 1 unknown, with provided label
-        # if others_count > 0 => nb of 'real' unknown
-
-
-
-    def get_retreated_dataframe(self, diarization_df, episod_id, unknown_id, start_ep):
+    def get_retreated_dataframe(self, diarization_df, merged_diffusion_info):
 
         ''' rename speakers and provide dataframe with for each segment,
         speaker name, time stamp start & end, length, epidod ID and speaker status '''
+
+        episod_id = merged_diffusion_info['episod_id']
+        unknown_id = merged_diffusion_info['unknown_id']
+        start_ep = merged_diffusion_info['start_ep']
 
         # rename speakers
         if not self.other_speakers:
@@ -143,18 +147,10 @@ class Speaker:
 
         return df_rtrt
 
-    # def merge_small_samples(self):
-    #     for i in len(self.unknown_dicts)+1:
-    #         if self.unknown_dicts[i+1]['unknown_id'] == 'unknown_id':
-    #             pass
-    #     # for k, v in self.unknown_dicts.items():
 
+    def upload_samples_tables(self, audio_file : Audio, gsClient : StorageClient, big_query : BigQueryClient, bucket_name, sample_dataset):
 
-    def upload_samples_tables(self, audio_file : Audio, gsClient : StorageClient, big_query : BigQueryClient, bucket_name, sample_dataset, blob_folderpath):
-        # for i in range(self.others_count) :
-        #     extract_sample = audio_file.export_sample(start=self.unknown_dicts[i]['timestamp'], length=self.unknown_dicts[i]['length'], label=self.unknown_dicts[i]['unknown_id'])
-        #     blob = gsClient.upload_blob(input_path = extract_sample.filepath, bucket_name=bucket_name, blob_folderpath='personnality_sample')
-        #     self.unknown_dicts[i]['gs_mp3_sample'] = f"gs://{bucket_name}/{sample_dataset}/{blob.name.split('/')[-1]}"
+        blob_folderpath = 'personnality_sample'
 
         df_unknown_dict = pd.DataFrame(self.unknown_dicts)
         dict_speakers = list(df_unknown_dict.unknown_id.unique())
