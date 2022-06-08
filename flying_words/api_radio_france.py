@@ -20,7 +20,7 @@ class ApiRadioFrance:
         # Get previous day time window
         today = datetime.today().replace(hour=0, minute=0, second=0, microsecond=0)
         start_date_epoch = int((today - timedelta(days=previous_day)).timestamp())
-        end_date_epoch= int((today -   timedelta(days=previous_day+1) - timedelta(seconds=1)).timestamp())
+        end_date_epoch= int((today -   timedelta(days=previous_day-1) - timedelta(seconds=1)).timestamp())
 
         #query to retrieve grid info from API
         query_yesterday_grid = """query {
