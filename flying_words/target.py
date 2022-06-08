@@ -7,23 +7,23 @@ class Target:
     def __init__(self, bqClient: BigQueryClient):
 
         self.bqClient = bqClient
-        self.info = None
-        self.load_info()
+        self.table = None
+        self.load_table()
 
-    def load_info(self):
-        self.info = self.bqClient.get_table('flying_words', 'view_target_output').iloc[0]
-        return self.info
+    def load_table(self):
+        self.table = self.bqClient.get_table('flying_words', 'view_target_output').iloc[0]
+        return self.table
 
     def update_target_diffusion_storage_link(self, gsClient: StorageClient, bucket_name):
 
-        if len(self.info) == 0:
+        if len(self.table) == 0:
             return None
 
         dataset = 'flying_words'
         episode_table = 'episode'
-        if self.info['episode_lien_mp3_google_storage'] == 'to be filled':
+        if self.table['episode_lien_mp3_google_storage'] == 'to be filled':
             diffusions_table = self.bqClient.get_table(dataset, episode_table)
-            target_diffusion = diffusions_table[diffusions_table['id'] == self.info['episode_id']]
+            target_diffusion = diffusions_table[diffusions_table['id'] == self.table['episode_id']]
             # Download podcast
             podcast_url = target_diffusion['podcastEpisode'].iloc[0]
             podcast_path = os.path.join('raw_data', os.path.basename(podcast_url))
@@ -38,4 +38,7 @@ class Target:
 
             # Update episode table with storage link
             blob_uri = f'gs://{bucket_name}/{blob.name}'
-            self.bqClient.update_table(dataset, episode_table, 'id', self.info['episode_id'], 'lien_mp3_google_storage', blob_uri)
+            self.bqClient.update_table(dataset,
+                                       episode_table, 'id',
+                                       self.table['episode_id'], 'lien_mp3_google_storage',
+                                       blob_uri)

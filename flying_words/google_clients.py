@@ -128,7 +128,7 @@ class BigQueryClient:
     def episode_speaking_time_df(self, episode_id:str):
         ###filter on episode_id
         segmentation = self.get_table(dataset='flying_words', table_name='segmentation')
-        segmentation_filter_episode = segmentation[segmentation["episod_id"]==episode_id]
+        segmentation_filter_episode = segmentation[segmentation["episod_id"] == episode_id]
         segmentation_filter_episode = segmentation_filter_episode.sort_values(by ="rtrt_start")
         j=0
         ###create range_speaker column
