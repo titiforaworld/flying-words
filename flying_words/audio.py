@@ -135,8 +135,6 @@ def merge_diffusion_with_samples(target_response: pd.DataFrame, gsClient:Storage
     diffusion_path = os.path.join(episode_folder, os.path.basename(diffusion_blob_uri))
     gsClient.download_blob(diffusion_blob_uri, diffusion_path)
     diffusion_audio = Audio(diffusion_path).export_conversion('wav')
-    os.remove(diffusion_path)
-    os.remove(diffusion_audio.filepath)
 
     # Retrieve samples information and download blob
     sample_audios = []
@@ -146,7 +144,6 @@ def merge_diffusion_with_samples(target_response: pd.DataFrame, gsClient:Storage
             sample_path = os.path.join(samples_folder, os.path.basename(sample_blob_uri))
             gsClient.download_blob(sample_blob_uri, sample_path)
             sample_audios.append(Audio(sample_path).export_conversion('wav'))
-            os.remove(sample_path)
 
         # Samples Merging
         merged_audio = AudioSegment.empty()
@@ -170,8 +167,6 @@ def merge_diffusion_with_samples(target_response: pd.DataFrame, gsClient:Storage
                                     merged_audio=Audio(merge_path),
                                     show_start=show_start,
                                     diffusion_audio=diffusion_audio)
-
-        os.remove(merge_path)
 
     else:
         merged_audio_info = dict(episode_id=episode_id,
