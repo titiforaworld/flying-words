@@ -27,7 +27,9 @@ class Speaker:
 
     def get_unknown_info(self, diarization_df: pd.DataFrame, known_ids, unknown_id):
         '''Provide information (timestamp, extract length & label) to extract audio sample of unknown speaker(s).'''
-
+        # clear known_ids list in case of no sample (empty list)
+        if None in known_ids:
+            known_ids = []
         # get list of segmented speakers (from diarization) and list of speakers from input
         self.audio_speakers = diarization_df['name_id'].unique().tolist()
         self.speaker_ids = known_ids + [unknown_id]
@@ -97,9 +99,9 @@ class Speaker:
                         tracker += 1
                         if tracker < id_speaker_segments.shape[0]:
                             self.unknown_dicts.extend(dict_id)
-                            self.other_IDs.append(other_id)
                         else:
                             break
+                    self.other_IDs.append(other_id)
         # create dictionary to match segmented speakers & speaker list
         self.otherIDs_mapping = dict(zip(self.other_IDs, self.other_speakers))
 
@@ -140,6 +142,13 @@ class Speaker:
         df_rtrt = df_rtrt.reindex(columns=column_names)
 
         return df_rtrt
+
+    # def merge_small_samples(self):
+    #     for i in len(self.unknown_dicts)+1:
+    #         if self.unknown_dicts[i+1]['unknown_id'] == 'unknown_id':
+    #             pass
+    #     # for k, v in self.unknown_dicts.items():
+
 
     def upload_samples_tables(self, audio_file : Audio, gsClient : StorageClient, big_query : BigQueryClient, bucket_name, sample_dataset):
         for i in range(self.others_count) :
