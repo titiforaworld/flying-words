@@ -49,17 +49,16 @@ def diffusion_segmentation(bqClient: BigQueryClient, gsClient: StorageClient, bu
     return segmentation_df
 
 
-def build_flow():
+def build_flow(env_vars):
     """
     build the prefect workflow for 'flying_words' package
     """
 
-    gcp_credentials_path = os.getenv('GCP_CREDENTIALS_PATH')
-    gcp_project = os.getenv('GCP_PROJECT')
-    gcp_bucket= os.getenv('GCP_BUCKET')
-
     with Flow('flying_words_flow') as flow:
-        gsClient, bqClient = connect_google_clients(gcp_project, gcp_credentials_path)
-        target_table = diffusion_segmentation(bqClient, gsClient, gcp_bucket)
+
+        gsClient, bqClient = connect_google_clients(env_vars['gcp_project'],
+                                                    env_vars['gcp_credentials_path'])
+
+        target_table = diffusion_segmentation(bqClient, gsClient, env_vars['gcp_bucket'])
 
     return flow
