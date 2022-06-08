@@ -57,6 +57,15 @@ class StorageClient:
 
         return blob
 
+    def get_transcript_df(self, blob_uri: str,  output_path: str):
+        self.download_blob(blob_uri,output_path )
+        with open(output_path) as f:
+            text_dict = f.read()
+
+        text_file_df = pd.DataFrame(eval(text_dict))
+        text_file_df['Offset'] = text_file_df['Offset']/ 10000000
+        text_file_df['End_word'] = text_file_df['Offset']/ 10000000 + text_file_df['Duration'] / 10000000
+        return text_file_df
 
 class BigQueryClient:
     """A class for Big Query Management."""
@@ -114,3 +123,26 @@ class BigQueryClient:
         assert job.num_dml_affected_rows is not None
 
         return job.num_dml_affected_rows
+
+
+    def episode_speaking_time_df(self, episode_id:str  ):
+        ###filter on episode_id
+        segmentation = self.get_table(dataset='flying_words', table_name='segmentation')
+        segmentation_filter_episode = segmentation[segmentation["episod_id"]==episode_id]
+        segmentation_filter_episode = segmentation_filter_episode.sort_values(by ="rtrt_start")
+        j=0
+        ###create range_speaker column
+        segmentation_filter_episode["range_speaker"]=0.0
+
+        ###loop over
+        for i in range(len(segmentation_filter_episode["episod_id"])):
+            if i!=0 :
+                if segmentation_filter_episode["speaker"].iloc[i] != segmentation_filter_episode["speaker"].iloc[i-1]:
+                    j=j+1
+
+            segmentation_filter_episode["range_speaker"].iloc[i]=j
+
+
+        ordered_speaking_time = segmentation_filter_episode.groupby(["episod_id","range_speaker","speaker"],as_index=False).agg({"rtrt_start":'min',"rtrt_end":"max","segment_length":'sum' } )
+
+        return ordered_speaking_time
