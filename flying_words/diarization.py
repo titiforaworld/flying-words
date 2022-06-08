@@ -47,6 +47,6 @@ class Diarization:
             segmentation.append([speaker, turn_start, turn_end])
 
         self.diarization_df = pd.DataFrame(segmentation, columns=['name_id', 'start', 'end'])
-        self.diarization_df['segment_length'] = self.diarization_df['end'] - self.diarization_df['start']
+        self.diarization_df['segment_length'] = round((self.diarization_df['end'] - self.diarization_df['start']),3)
 
         return self.diarization_df
