@@ -28,7 +28,7 @@ class Speaker:
     def get_unknown_info(self, diarization_df: pd.DataFrame, merged_diffusion_info):
         '''Provide information (timestamp, extract length & label) to extract audio sample of unknown speaker(s).'''
 
-        known_ids = merged_diffusion_info['known_ids']
+        known_ids = list(merged_diffusion_info['known_ids'])
         unknown_id = merged_diffusion_info['unknown_id']
 
         # clear known_ids list in case of no sample (empty list)
