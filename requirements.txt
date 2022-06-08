@@ -68,3 +68,6 @@ protobuf==3.19.0
 speechbrain
 
 db-dtypes
+
+prefect
+prefect[viz]
