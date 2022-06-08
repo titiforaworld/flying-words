@@ -127,14 +127,14 @@ def merge_diffusion_with_samples(target_response: pd.DataFrame, gsClient:Storage
 
     if isinstance(target_response, pd.DataFrame):
         diffusion_blob_uri = target_response['episode_lien_mp3_google_storage'][0]
-        episode_id = target_response['episode_id'][0]
+        episod_id = target_response['episode_id'][0]
         unknown_id = target_response['personnality_to_sample_name_id'][0]
         known_ids = target_response['name_id_known_guest'][:]
         sample_blobs_uri = target_response['gs_mp3_sample'][:]
 
     elif isinstance(target_response, pd.Series):
         diffusion_blob_uri = target_response['episode_lien_mp3_google_storage']
-        episode_id = target_response['episode_id']
+        episod_id = target_response['episode_id']
         unknown_id = target_response['personnality_to_sample_name_id']
         known_ids = None
         sample_blobs_uri = None
@@ -170,7 +170,7 @@ def merge_diffusion_with_samples(target_response: pd.DataFrame, gsClient:Storage
         merge_path = os.path.join(merges_folder, f'{merge_filename}.wav')
         merged_audio.export(merge_path, format="wav")
 
-        merged_audio_info = dict(episode_id=episode_id,
+        merged_audio_info = dict(episod_id=episod_id,
                                  known_ids=known_ids,
                                  unknown_id=unknown_id,
                                  merged_audio=Audio(merge_path),
@@ -178,7 +178,7 @@ def merge_diffusion_with_samples(target_response: pd.DataFrame, gsClient:Storage
                                  diffusion_audio=diffusion_audio)
 
     else:
-        merged_audio_info = dict(episode_id=episode_id,
+        merged_audio_info = dict(episod_id=episod_id,
                                  known_ids=known_ids,
                                  unknown_id=unknown_id,
                                  merged_audio=diffusion_audio,
