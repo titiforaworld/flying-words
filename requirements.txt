@@ -70,4 +70,3 @@ speechbrain
 db-dtypes
 
 prefect
-prefect[viz]
