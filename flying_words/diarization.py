@@ -46,12 +46,7 @@ class Diarization:
             turn_end = round(turn.end,3)
             segmentation.append([speaker, turn_start, turn_end])
 
-        # def time_format(x):
-        #     return f'{int(x / 60)}:{round(x % 60, 3)}'
-
         self.diarization_df = pd.DataFrame(segmentation, columns=['name_id', 'start', 'end'])
-        # self.diarization_df['start_format'] = self.diarization_df['start'].map(time_format)
-        # self.diarization_df['end_format'] = self.diarization_df['end'].map(time_format)
         self.diarization_df['segment_length'] = self.diarization_df['end'] - self.diarization_df['start']
 
         return self.diarization_df

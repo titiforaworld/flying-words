@@ -106,7 +106,7 @@ class BigQueryClient:
             SET {column} = '{new_value}'
             WHERE {column_condition} = '{value_condition}'
             """
-        print(query)
+
         job = self.client.query(query)
 
         job.result()
