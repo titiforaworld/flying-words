@@ -3,7 +3,7 @@ import string
 import random
 from flying_words.audio import Audio
 from flying_words.google_clients import StorageClient, BigQueryClient
-
+from pydub import AudioSegment
 
 class Speaker:
     ''' inputs needed :
@@ -150,11 +150,28 @@ class Speaker:
     #     # for k, v in self.unknown_dicts.items():
 
 
-    def upload_samples_tables(self, audio_file : Audio, gsClient : StorageClient, big_query : BigQueryClient, bucket_name, sample_dataset):
-        for i in range(self.others_count) :
-            extract_sample = audio_file.export_sample(start=self.unknown_dicts[i]['timestamp'], length=self.unknown_dicts[i]['length'], label=self.unknown_dicts[i]['unknown_id'])
-            blob = gsClient.upload_blob(input_path = extract_sample.filepath, bucket_name='le-wagon-project-75667-antoine', blob_folderpath='personnality_sample')
-            self.unknown_dicts[i]['gs_mp3_sample'] = f"gs://{bucket_name}/{sample_dataset}/{blob.name.split('/')[-1]}"
+    def upload_samples_tables(self, audio_file : Audio, gsClient : StorageClient, big_query : BigQueryClient, bucket_name, sample_dataset, blob_folderpath):
+        # for i in range(self.others_count) :
+        #     extract_sample = audio_file.export_sample(start=self.unknown_dicts[i]['timestamp'], length=self.unknown_dicts[i]['length'], label=self.unknown_dicts[i]['unknown_id'])
+        #     blob = gsClient.upload_blob(input_path = extract_sample.filepath, bucket_name=bucket_name, blob_folderpath='personnality_sample')
+        #     self.unknown_dicts[i]['gs_mp3_sample'] = f"gs://{bucket_name}/{sample_dataset}/{blob.name.split('/')[-1]}"
+
+        df_unknown_dict = pd.DataFrame(self.unknown_dicts)
+        dict_speakers = list(df_unknown_dict.unknown_id.unique())
+        for speaker in dict_speakers :
+            check_one_row = df_unknown_dict[["unknown_id"]].value_counts()==1
+            if check_one_row[speaker] and df_unknown_dict[df_unknown_dict['unknown_id']==speaker]['length'].max() >= 60:
+                extract_sample = audio_file.export_sample(start=df_unknown_dict[df_unknown_dict['unknown_id']==speaker]['timestamp'].max(), length=df_unknown_dict[df_unknown_dict['unknown_id']==speaker]['length'].max(), label=speaker)
+                blob = gsClient.upload_blob(input_path = extract_sample.filepath, bucket_name=bucket_name, blob_folderpath=blob_folderpath)
+                self.unknown_dicts[speaker]['gs_mp3_sample'] = f"gs://{bucket_name}/{sample_dataset}/{blob.name.split('/')[-1]}"
+            elif not check_one_row[speaker]:
+                df_speaker = df_unknown_dict[df_unknown_dict['unknown_id']==speaker]
+                extract_new_sample = AudioSegment.empty()
+                for i in range(df_speaker.shape[0]):
+                    extract_new_sample = extract_new_sample + audio_file.export_sample(start=df_speaker.iloc[i]['timestamp'], length=df_speaker.iloc[i]['length'], label=speaker).segment
+                    blob = gsClient.upload_blob(input_path = extract_new_sample.filepath, bucket_name=bucket_name, blob_folderpath=blob_folderpath)
+                    self.unknown_dicts[speaker]['gs_mp3_sample'] = f"gs://{bucket_name}/{sample_dataset}/{blob.name.split('/')[-1]}"
+
 
         samples_df = pd.DataFrame(data=self.unknown_dicts)
         samples_df = samples_df.drop(columns=["timestamp", "length"])
