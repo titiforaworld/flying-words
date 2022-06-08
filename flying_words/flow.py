@@ -81,7 +81,7 @@ def speaker_sampler(diffusion_diarization_df,
     logger.info('Unknown information get')
 
     # get retreated dataframe
-    retreated_df = speaker.retreated_dataframe(diffusion_diarization_df, merged_diffusion_info)
+    retreated_df = speaker.get_retreated_dataframe(diffusion_diarization_df, merged_diffusion_info)
     logger.info('Transformed diazrization dataframe to take merged samples into account')
 
     # upload retreated dataframe to Big Query
@@ -90,7 +90,7 @@ def speaker_sampler(diffusion_diarization_df,
 
     # upload speaker samples to Could Storage
     sample_dataset = "personnality_sample"
-    speaker.upload_samples_tables(audio_file=merged_diffusion_info['show_start'],
+    speaker.upload_samples_tables(audio_file=merged_diffusion_info['diffusion_audio'],
                                   gsClient=gsClient,
                                   big_query=bqClient,
                                   bucket_name=bucket_name,

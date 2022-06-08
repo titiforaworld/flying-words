@@ -10,7 +10,7 @@ class Speaker:
     - diarization_df : dataframe from diarization Class
     - known_ids : list of speakers ID we know
     - unknown_id : ID of target speaker
-    - start_ep : timestamp of real episod start
+    - show_start : timestamp of real episod start
     - episod_ID : ID of the episod
     '''
 
@@ -120,7 +120,7 @@ class Speaker:
 
         episod_id = merged_diffusion_info['episod_id']
         unknown_id = merged_diffusion_info['unknown_id']
-        start_ep = merged_diffusion_info['start_ep']
+        show_start = merged_diffusion_info['show_start']
 
         # rename speakers
         if not self.other_speakers:
@@ -131,10 +131,10 @@ class Speaker:
             diarization_df['name_id'].replace(self.otherIDs_mapping[self.other_IDs[i]],self.other_IDs[i],inplace = True) # replace the other speakers
 
         # create retreated DataFrame + drop segments corresponding to voice extracts
-        df_rtrt = diarization_df.drop(diarization_df[diarization_df.start < start_ep].index)
+        df_rtrt = diarization_df.drop(diarization_df[diarization_df.start < show_start].index)
         # set timestamps to 'real' episod start (withouth voice extracts)
-        df_rtrt['start'] = df_rtrt['start'].map(lambda x : x - start_ep)
-        df_rtrt['end'] = df_rtrt['end'].map(lambda x : x - start_ep)
+        df_rtrt['start'] = df_rtrt['start'].map(lambda x : x - show_start)
+        df_rtrt['end'] = df_rtrt['end'].map(lambda x : x - show_start)
 
         # add a column with speaker status : known (voice sample with lable in library), unknown (voice sample wihtout label)
         df_rtrt['speaker_status'] = df_rtrt['name_id'].copy()
