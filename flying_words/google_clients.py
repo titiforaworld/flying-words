@@ -58,7 +58,8 @@ class StorageClient:
         return blob
 
     def get_transcript_df(self, blob_uri: str,  output_path: str):
-        self.download_blob(blob_uri,output_path )
+
+        self.download_blob(blob_uri, output_path)
         with open(output_path) as f:
             text_dict = f.read()
 
@@ -137,13 +138,13 @@ class BigQueryClient:
         ###loop over
         for i in range(len(segmentation_filter_episode["episod_id"])):
             if i!=0 :
-                if segmentation_filter_episode["speaker"].iloc[i] != segmentation_filter_episode["speaker"].iloc[i-1]:
+                if segmentation_filter_episode["name_id"].iloc[i] != segmentation_filter_episode["name_id"].iloc[i-1]:
                     j=j+1
 
             segmentation_filter_episode["range_speaker"].iloc[i]=j
 
 
-        ordered_speaking_time = segmentation_filter_episode.groupby(["episod_id","range_speaker","speaker"],as_index=False).agg({"rtrt_start":'min',"rtrt_end":"max","segment_length":'sum' } )
+        ordered_speaking_time = segmentation_filter_episode.groupby(["episod_id","range_speaker","name_id"],as_index=False).agg({"rtrt_start":'min',"rtrt_end":"max","segment_length":'sum' } )
 
         return ordered_speaking_time
 
@@ -155,17 +156,17 @@ class BigQueryClient:
         speak_time = self.episode_speaking_time_df(self, episode_id, bqClient).sort_values('rtrt_start')
 
         # Create the text_file_df
-        text_file_df["speaker"] ="to_be_filled"
+        text_file_df["name_id"] ="to_be_filled"
         text_file_df['range_speaker'] = "to_be_filled"
 
         j=0
         for i in range(text_file_df.shape[0]):
             if text_file_df["End_word"].iloc[i] < speak_time["rtrt_end"].loc[j]:
-                text_file_df["speaker"].iloc[i] = speak_time["speaker"].loc[j]
+                text_file_df["name_id"].iloc[i] = speak_time["name_id"].loc[j]
                 text_file_df["range_speaker"].iloc[i] = speak_time["range_speaker"].loc[j].astype(int)
 
         else :
-            text_file_df["speaker"].iloc[i]=speak_time["speaker"].loc[j+1]
+            text_file_df["name_id"].iloc[i]=speak_time["name_id"].loc[j+1]
             text_file_df["range_speaker"].iloc[i] = speak_time["range_speaker"].loc[j+1].astype(int)
             j=j+1
 

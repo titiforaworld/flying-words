@@ -110,3 +110,5 @@ class Transcription:
         bqClient.update_table(dataset, table,
                               'id', self.episode_id,
                               'transcription_dict', transcript_dict_blob_uri)
+
+        return transcript_blob_uri, transcript_dict_blob_uri

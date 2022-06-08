@@ -10,6 +10,7 @@ from flying_words.audio import merge_diffusion_with_samples
 from flying_words.target import Target
 from flying_words.diarization import Diarization
 from flying_words.speaker import Speaker
+from flying_words.transcription import Transcription
 
 
 logger = context.get("logger")
@@ -99,6 +100,39 @@ def speaker_sampler(diffusion_diarization_df,
     logger.info('Uploaded speaker samples to GCP')
 
 
+@task
+def transcription(target: Target,
+                  merged_audio_info,
+                  bqClient: BigQueryClient,
+                  gsClient: StorageClient,
+                  bucket_name):
+
+    print(Fore.GREEN + "\n# 🐙 Prefect task - Transcript diffusion:" + Style.RESET_ALL)
+
+    transcription = Transcription(merged_audio_info['diffusion_audio'], target.table['episode_id'])
+    transcription.make_transcription()
+
+    transcript_blob_uri, transcript_dict_blob_uri = transcription.upload_to_gcp(gsClient, bucket_name, bqClient)
+
+    return (transcript_blob_uri, transcript_dict_blob_uri)
+
+@task
+def get_result(target: Target,
+               bqClient: BigQueryClient,
+               gsClient: StorageClient,
+               transcript_blob_uri,
+               transcript_dict_blob_uri):
+
+    print(Fore.GREEN + "\n# 🐙 Prefect task - Get result:" + Style.RESET_ALL)
+
+    transcript_dict_path = os.path.join('raw_data', 'transcript.txt')
+    transcript_df = gsClient.get_transcript_df(transcript_dict_blob_uri, transcript_dict_path)
+
+    result = bqClient.words_diarization_info_merger(transcript_df, target.table['episode_id'], bqClient)
+
+    print(result)
+
+
 def build_flow(env_vars):
     """
     build the prefect workflow for 'flying_words' package
@@ -120,5 +154,7 @@ def build_flow(env_vars):
                         bqClient,
                         gsClient,
                         env_vars['gcp_bucket'])
+
+        transcript_blob_uri, transcript_dict_blob_uri = transcription(target, merged_audio_info)
 
     return flow
