@@ -175,6 +175,11 @@ def build_flow(env_vars):
                                                                       gsClient,
                                                                       env_vars['gcp_bucket'])
 
-        get_result(target, bqClient, gsClient, transcript_blob_uri, transcript_dict_blob_uri)
+        get_result(target,
+                   bqClient,
+                   gsClient,
+                   env_vars['gcp_bucket'],
+                   transcript_blob_uri,
+                   transcript_dict_blob_uri,)
 
     return flow
