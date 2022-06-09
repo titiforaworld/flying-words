@@ -157,4 +157,6 @@ def build_flow(env_vars):
 
         transcript_blob_uri, transcript_dict_blob_uri = transcription(target, merged_audio_info)
 
+        print(get_result(target, bqClient, gsClient, transcript_blob_uri, transcript_dict_blob_uri))
+
     return flow
