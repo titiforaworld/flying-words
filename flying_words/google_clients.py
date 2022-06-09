@@ -57,16 +57,18 @@ class StorageClient:
 
         return blob
 
-    def get_transcript_df(self, blob_uri: str,  output_path: str):
+    def get_transcript_df(self, dict_blob_uri: str, text_blob_uri: str, output_path: str):
 
-        self.download_blob(blob_uri, output_path)
+        self.download_blob(dict_blob_uri, output_path)
         with open(output_path) as f:
             text_dict = f.read()
 
-        text_file_df = pd.DataFrame(eval(text_dict))
-        text_file_df['Offset'] = text_file_df['Offset']/ 10000000
-        text_file_df['End_word'] = text_file_df['Offset'] + text_file_df['Duration'] / 10000000
-        return text_file_df
+        text_dict_df = pd.DataFrame(eval(text_dict))
+        text_dict_df['Offset'] = text_dict_df['Offset']/ 10000000
+        text_dict_df['End_word'] = text_dict_df['Offset'] + text_dict_df['Duration'] / 10000000
+
+
+        return text_dict_df
 
 class BigQueryClient:
     """A class for Big Query Management."""
@@ -144,7 +146,7 @@ class BigQueryClient:
             segmentation_filter_episode["range_speaker"].iloc[i]=j
 
 
-        ordered_speaking_time = segmentation_filter_episode.groupby(["episod_id","range_speaker","name_id"],as_index=False).agg({"rtrt_start":'min',"rtrt_end":"max","segment_length":'sum' } )
+        ordered_speaking_time = segmentation_filter_episode.groupby(["episod_id","range_speaker","name_id"],as_index=False).agg({"start":'min',"end":"max","segment_length":'sum' } )
 
         return ordered_speaking_time
 
@@ -161,7 +163,7 @@ class BigQueryClient:
 
         j=0
         for i in range(text_file_df.shape[0]):
-            if text_file_df["End_word"].iloc[i] < speak_time["rtrt_end"].loc[j]:
+            if text_file_df["End_word"].iloc[i] < speak_time["end"].loc[j]:
                 text_file_df["name_id"].iloc[i] = speak_time["name_id"].loc[j]
                 text_file_df["range_speaker"].iloc[i] = speak_time["range_speaker"].loc[j].astype(int)
 
