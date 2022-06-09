@@ -43,11 +43,11 @@ class Transcription:
         words = []
         def parse_azure_result(evt):
             response = json.loads(evt.result.json)
-            transcript_display.append(response['DisplayText'])
             confidence_list_temp = [item.get('Confidence') for item in response['NBest']]
             max_confidence_index = confidence_list_temp.index(max(confidence_list_temp))
             confidence_list.append(response['NBest'][max_confidence_index]['Confidence'])
             words.extend(response['NBest'][max_confidence_index]['Words'])
+            transcript_display.append(response['NBest'][max_confidence_index]['Display'])
             print(evt.result.json)
 
         # Service callback that stops continuous recognition upon receiving an event `evt`
