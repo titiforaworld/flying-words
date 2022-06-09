@@ -100,7 +100,7 @@ def speaker_sampler(diffusion_diarization_df,
     logger.info('Uploaded speaker samples to GCP')
 
 
-@task
+@task(nout=2)
 def transcription(target: Target,
                   merged_audio_info,
                   bqClient: BigQueryClient,
