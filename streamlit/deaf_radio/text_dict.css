@@ -1,0 +1,19 @@
+html,
+body {
+    height: 100%;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+audio {
+    margin-bottom: 24px;
+}
+
+video {
+    max-width: 80%;
+}
