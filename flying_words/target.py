@@ -19,6 +19,9 @@ class Target:
         if len(self.table) == 0:
             return None
 
+        episode_folder = 'raw_data'
+        os.makedirs('raw_data', exist_ok=True)
+
         dataset = 'flying_words'
         episode_table = 'episode'
         if self.table['episode_lien_mp3_google_storage'] == 'to be filled':
@@ -26,7 +29,7 @@ class Target:
             target_diffusion = diffusions_table[diffusions_table['id'] == self.table['episode_id']]
             # Download podcast
             podcast_url = target_diffusion['podcastEpisode'].iloc[0]
-            podcast_path = os.path.join('raw_data', os.path.basename(podcast_url))
+            podcast_path = os.path.join(episode_folder, os.path.basename(podcast_url))
             with requests.get(podcast_url, stream=True) as r:
                 r.raise_for_status()
                 with open(podcast_path, 'wb') as f:
