@@ -19,10 +19,10 @@ class Transcription:
         self.result = None
 
 
-    def make_transcription(self):
+    def make_transcription(self, azure_token):
         """Process diarization on audio-souce."""
 
-        speech_config = speechsdk.SpeechConfig(subscription=os.getenv("AZURE_TOKEN"),
+        speech_config = speechsdk.SpeechConfig(subscription=azure_token,
                                                region="francecentral",
                                                speech_recognition_language = 'fr-FR')
 
@@ -43,12 +43,12 @@ class Transcription:
         words = []
         def parse_azure_result(evt):
             response = json.loads(evt.result.json)
-            transcript_display.append(response['DisplayText'])
             confidence_list_temp = [item.get('Confidence') for item in response['NBest']]
             max_confidence_index = confidence_list_temp.index(max(confidence_list_temp))
             confidence_list.append(response['NBest'][max_confidence_index]['Confidence'])
             words.extend(response['NBest'][max_confidence_index]['Words'])
-            print(evt)
+            transcript_display.append(response['NBest'][max_confidence_index]['Display'])
+            print(evt.result.json)
 
         # Service callback that stops continuous recognition upon receiving an event `evt`
         def stop_cb(evt):
@@ -110,3 +110,5 @@ class Transcription:
         bqClient.update_table(dataset, table,
                               'id', self.episode_id,
                               'transcription_dict', transcript_dict_blob_uri)
+
+        return transcript_blob_uri, transcript_dict_blob_uri

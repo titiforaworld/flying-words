@@ -10,6 +10,7 @@ from flying_words.audio import merge_diffusion_with_samples
 from flying_words.target import Target
 from flying_words.diarization import Diarization
 from flying_words.speaker import Speaker
+from flying_words.transcription import Transcription
 
 
 logger = context.get("logger")
@@ -99,6 +100,54 @@ def speaker_sampler(diffusion_diarization_df,
     logger.info('Uploaded speaker samples to GCP')
 
 
+@task(nout=2)
+def transcription(target: Target,
+                  merged_audio_info,
+                  bqClient: BigQueryClient,
+                  gsClient: StorageClient,
+                  bucket_name,
+                  azure_token):
+
+    print(Fore.GREEN + "\n# 🐙 Prefect task - Transcript diffusion:" + Style.RESET_ALL)
+
+    transcription = Transcription(merged_audio_info['diffusion_audio'], target.table['episode_id'])
+    transcription.make_transcription(azure_token)
+
+    transcript_blob_uri, transcript_dict_blob_uri = transcription.upload_to_gcp(gsClient, bucket_name, bqClient)
+
+    return (transcript_blob_uri, transcript_dict_blob_uri)
+
+@task
+def get_result(target: Target,
+               bqClient: BigQueryClient,
+               gsClient: StorageClient, bucket_name,
+               transcript_blob_uri,
+               transcript_dict_blob_uri):
+
+    print(Fore.GREEN + "\n# 🐙 Prefect task - Get result:" + Style.RESET_ALL)
+
+    transcript_dict_path = os.path.join('raw_data', 'transcript.txt')
+    transcript_df = gsClient.get_transcript_df(transcript_dict_blob_uri, transcript_blob_uri, transcript_dict_path)
+
+    result = bqClient.words_diarization_info_merger(transcript_df, target.table['episode_id'], bqClient)
+
+    # Create results folder if doesn't exist
+    results_folder_path = os.path.join('raw_data', 'results')
+    os.makedirs(results_folder_path, exist_ok=True)
+
+    # Create result CSV
+    result_filename = f"result_{target.table['episode_id']}.csv"
+    result_path = os.path.join(results_folder_path, result_filename)
+    result.to_csv(result_path)
+
+    # Upload result CSV
+    blob = gsClient.upload_blob(result_path, bucket_name, 'result')
+    blob_uri = f'gs://{bucket_name}/{blob.name}'
+
+    bqClient.update_table('flying_words', 'episode', 'id', target.table['episode_id'],
+                          'enhanced_transcription', blob_uri)
+
+
 def build_flow(env_vars):
     """
     build the prefect workflow for 'flying_words' package
@@ -120,5 +169,19 @@ def build_flow(env_vars):
                         bqClient,
                         gsClient,
                         env_vars['gcp_bucket'])
+
+        transcript_blob_uri, transcript_dict_blob_uri = transcription(target,
+                                                                      merged_audio_info,
+                                                                      bqClient,
+                                                                      gsClient,
+                                                                      env_vars['gcp_bucket'],
+                                                                      env_vars['azure_token'])
+
+        get_result(target,
+                   bqClient,
+                   gsClient,
+                   env_vars['gcp_bucket'],
+                   transcript_blob_uri,
+                   transcript_dict_blob_uri,)
 
     return flow

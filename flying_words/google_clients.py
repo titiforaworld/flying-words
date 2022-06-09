@@ -57,15 +57,39 @@ class StorageClient:
 
         return blob
 
-    def get_transcript_df(self, blob_uri: str,  output_path: str):
-        self.download_blob(blob_uri,output_path )
+    def get_transcript_df(self, dict_blob_uri: str, text_blob_uri: str, output_path: str):
+
+        self.download_blob(dict_blob_uri, output_path)
         with open(output_path) as f:
             text_dict = f.read()
 
-        text_file_df = pd.DataFrame(eval(text_dict))
-        text_file_df['Offset'] = text_file_df['Offset']/ 10000000
-        text_file_df['End_word'] = text_file_df['Offset'] + text_file_df['Duration'] / 10000000
-        return text_file_df
+        text_dict_df = pd.DataFrame(eval(text_dict))
+        text_dict_df['Offset'] = text_dict_df['Offset']/ 10000000
+        text_dict_df['End_word'] = text_dict_df['Offset'] + text_dict_df['Duration'] / 10000000
+
+        self.download_blob(text_blob_uri, output_path)
+
+        with open(output_path) as f:
+            text_file = f.read()
+
+            text_split = text_file.split(' ')
+
+        text_file_df = pd.DataFrame(text_split, columns=["Word"])
+        nb_row_dict=text_dict_df.shape[0]
+        nb_row_text=text_file_df.shape[0]
+        if nb_row_text>=nb_row_dict:
+            text_file_df["Offset"]=text_dict_df["Offset"]
+            text_file_df["Duration"]=text_dict_df["Duration"]
+            text_file_df["Confidence"]=text_dict_df["Confidence"]
+            text_file_df["End_word"]=text_dict_df["End_word"]
+            return text_file_df
+        elif  nb_row_text<nb_row_dict:
+            text_dict_df["Word"][:nb_row_text] =text_file_df["Word"]
+            text_dict_df["Word"][nb_row_text:] =""
+            return text_dict_df
+
+
+
 
 class BigQueryClient:
     """A class for Big Query Management."""
@@ -129,7 +153,7 @@ class BigQueryClient:
         ###filter on episode_id
         segmentation = self.get_table(dataset='flying_words', table_name='segmentation')
         segmentation_filter_episode = segmentation[segmentation["episod_id"] == episode_id]
-        segmentation_filter_episode = segmentation_filter_episode.sort_values(by ="rtrt_start")
+        segmentation_filter_episode = segmentation_filter_episode.sort_values(by ="start")
         j=0
         ###create range_speaker column
         segmentation_filter_episode["range_speaker"]=0.0
@@ -137,13 +161,13 @@ class BigQueryClient:
         ###loop over
         for i in range(len(segmentation_filter_episode["episod_id"])):
             if i!=0 :
-                if segmentation_filter_episode["speaker"].iloc[i] != segmentation_filter_episode["speaker"].iloc[i-1]:
+                if segmentation_filter_episode["name_id"].iloc[i] != segmentation_filter_episode["name_id"].iloc[i-1]:
                     j=j+1
 
             segmentation_filter_episode["range_speaker"].iloc[i]=j
 
 
-        ordered_speaking_time = segmentation_filter_episode.groupby(["episod_id","range_speaker","speaker"],as_index=False).agg({"rtrt_start":'min',"rtrt_end":"max","segment_length":'sum' } )
+        ordered_speaking_time = segmentation_filter_episode.groupby(["episod_id","range_speaker","name_id"],as_index=False).agg({"start":'min',"end":"max","segment_length":'sum' } )
 
         return ordered_speaking_time
 
@@ -152,20 +176,20 @@ class BigQueryClient:
         """
         text_file_df is taken from the get_transcript_df function above.
         """
-        speak_time = self.episode_speaking_time_df(self, episode_id, bqClient).sort_values('rtrt_start')
+        speak_time = self.episode_speaking_time_df(episode_id).sort_values('start')
 
         # Create the text_file_df
-        text_file_df["speaker"] ="to_be_filled"
+        text_file_df["name_id"] ="to_be_filled"
         text_file_df['range_speaker'] = "to_be_filled"
 
         j=0
         for i in range(text_file_df.shape[0]):
-            if text_file_df["End_word"].iloc[i] < speak_time["rtrt_end"].loc[j]:
-                text_file_df["speaker"].iloc[i] = speak_time["speaker"].loc[j]
+            if text_file_df["End_word"].iloc[i] < speak_time["end"].loc[j]:
+                text_file_df["name_id"].iloc[i] = speak_time["name_id"].loc[j]
                 text_file_df["range_speaker"].iloc[i] = speak_time["range_speaker"].loc[j].astype(int)
 
         else :
-            text_file_df["speaker"].iloc[i]=speak_time["speaker"].loc[j+1]
+            text_file_df["name_id"].iloc[i]=speak_time["name_id"].loc[j+1]
             text_file_df["range_speaker"].iloc[i] = speak_time["range_speaker"].loc[j+1].astype(int)
             j=j+1
 
@@ -175,9 +199,9 @@ class BigQueryClient:
         text_list=[]
         for j in range(speaking_time_by_speaker_df.shape[0]):
             if j==0 :
-                text_list.append(" ".join([ text_file_df[0].iloc[i] for i in range(speaking_time_by_speaker_df["End_word"].iloc[j])]))
+                text_list.append(" ".join([ text_file_df["Word"].iloc[i] for i in range(speaking_time_by_speaker_df["End_word"].iloc[j])]))
             else :
-                text_list.append(" ".join([ text_file_df[0].iloc[i] for i in range(speaking_time_by_speaker_df["End_word"].iloc[j-1], speaking_time_by_speaker_df["End_word"].iloc[j])]))
+                text_list.append(" ".join([ text_file_df["Word"].iloc[i] for i in range(speaking_time_by_speaker_df["End_word"].iloc[j-1], speaking_time_by_speaker_df["End_word"].iloc[j])]))
 
         # Add the transcript to the speak_time dataframe
         speak_time['transcript'] = pd.Series(text_list)
