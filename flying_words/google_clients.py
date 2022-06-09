@@ -199,9 +199,9 @@ class BigQueryClient:
         text_list=[]
         for j in range(speaking_time_by_speaker_df.shape[0]):
             if j==0 :
-                text_list.append(" ".join([ text_file_df[0].iloc[i] for i in range(speaking_time_by_speaker_df["End_word"].iloc[j])]))
+                text_list.append(" ".join([ text_file_df["Word"].iloc[i] for i in range(speaking_time_by_speaker_df["End_word"].iloc[j])]))
             else :
-                text_list.append(" ".join([ text_file_df[0].iloc[i] for i in range(speaking_time_by_speaker_df["End_word"].iloc[j-1], speaking_time_by_speaker_df["End_word"].iloc[j])]))
+                text_list.append(" ".join([ text_file_df["Word"].iloc[i] for i in range(speaking_time_by_speaker_df["End_word"].iloc[j-1], speaking_time_by_speaker_df["End_word"].iloc[j])]))
 
         # Add the transcript to the speak_time dataframe
         speak_time['transcript'] = pd.Series(text_list)
