@@ -119,18 +119,32 @@ def transcription(target: Target,
 @task
 def get_result(target: Target,
                bqClient: BigQueryClient,
-               gsClient: StorageClient,
+               gsClient: StorageClient, bucket_name,
                transcript_blob_uri,
                transcript_dict_blob_uri):
 
     print(Fore.GREEN + "\n# 🐙 Prefect task - Get result:" + Style.RESET_ALL)
 
     transcript_dict_path = os.path.join('raw_data', 'transcript.txt')
-    transcript_df = gsClient.get_transcript_df(transcript_dict_blob_uri, transcript_dict_path)
+    transcript_df = gsClient.get_transcript_df(transcript_dict_blob_uri, transcript_blob_uri, transcript_dict_path)
 
     result = bqClient.words_diarization_info_merger(transcript_df, target.table['episode_id'], bqClient)
 
-    print(result)
+    # Create results folder if doesn't exist
+    results_folder_path = os.path.join('raw_data', 'results')
+    os.makedirs(results_folder_path, exist_ok=True)
+
+    # Create result CSV
+    result_filename = f"result_{target.table['episode_id']}.csv"
+    result_path = os.path.join(results_folder_path, result_filename)
+    result.to_csv(result_path)
+
+    # Upload result CSV
+    blob = gsClient.upload_blob(result_path, bucket_name, 'result')
+    blob_uri = f'gs://{bucket_name}/{blob.name}'
+
+    bqClient.update_table('flying_words', 'episode', 'id', target.table['episode_id'],
+                          'enhanced_transcription', blob_uri)
 
 
 def build_flow(env_vars):
@@ -155,8 +169,12 @@ def build_flow(env_vars):
                         gsClient,
                         env_vars['gcp_bucket'])
 
-        transcript_blob_uri, transcript_dict_blob_uri = transcription(target, merged_audio_info)
+        transcript_blob_uri, transcript_dict_blob_uri = transcription(target,
+                                                                      merged_audio_info,
+                                                                      bqClient,
+                                                                      gsClient,
+                                                                      env_vars['gcp_bucket'])
 
-        print(get_result(target, bqClient, gsClient, transcript_blob_uri, transcript_dict_blob_uri))
+        get_result(target, bqClient, gsClient, transcript_blob_uri, transcript_dict_blob_uri)
 
     return flow

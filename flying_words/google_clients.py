@@ -153,7 +153,7 @@ class BigQueryClient:
         ###filter on episode_id
         segmentation = self.get_table(dataset='flying_words', table_name='segmentation')
         segmentation_filter_episode = segmentation[segmentation["episod_id"] == episode_id]
-        segmentation_filter_episode = segmentation_filter_episode.sort_values(by ="rtrt_start")
+        segmentation_filter_episode = segmentation_filter_episode.sort_values(by ="start")
         j=0
         ###create range_speaker column
         segmentation_filter_episode["range_speaker"]=0.0
@@ -176,7 +176,7 @@ class BigQueryClient:
         """
         text_file_df is taken from the get_transcript_df function above.
         """
-        speak_time = self.episode_speaking_time_df(self, episode_id, bqClient).sort_values('rtrt_start')
+        speak_time = self.episode_speaking_time_df(self, episode_id, bqClient).sort_values('start')
 
         # Create the text_file_df
         text_file_df["name_id"] ="to_be_filled"
