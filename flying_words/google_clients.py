@@ -176,7 +176,7 @@ class BigQueryClient:
         """
         text_file_df is taken from the get_transcript_df function above.
         """
-        speak_time = self.episode_speaking_time_df(self, episode_id, bqClient).sort_values('start')
+        speak_time = self.episode_speaking_time_df(self, episode_id).sort_values('start')
 
         # Create the text_file_df
         text_file_df["name_id"] ="to_be_filled"
