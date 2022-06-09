@@ -48,7 +48,7 @@ class Transcription:
             max_confidence_index = confidence_list_temp.index(max(confidence_list_temp))
             confidence_list.append(response['NBest'][max_confidence_index]['Confidence'])
             words.extend(response['NBest'][max_confidence_index]['Words'])
-            print(evt)
+            print(evt.result.json)
 
         # Service callback that stops continuous recognition upon receiving an event `evt`
         def stop_cb(evt):
