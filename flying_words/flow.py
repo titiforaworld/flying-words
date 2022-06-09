@@ -129,7 +129,7 @@ def get_result(target: Target,
     transcript_dict_path = os.path.join('raw_data', 'transcript.txt')
     transcript_df = gsClient.get_transcript_df(transcript_dict_blob_uri, transcript_blob_uri, transcript_dict_path)
 
-    result = bqClient.words_diarization_info_merger(transcript_df, target.table['episode_id'], bqClient)
+    result = bqClient.words_diarization_info_merger(transcript_df, target.table['episode_id'])
 
     # Create results folder if doesn't exist
     results_folder_path = os.path.join('raw_data', 'results')
