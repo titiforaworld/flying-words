@@ -67,8 +67,29 @@ class StorageClient:
         text_dict_df['Offset'] = text_dict_df['Offset']/ 10000000
         text_dict_df['End_word'] = text_dict_df['Offset'] + text_dict_df['Duration'] / 10000000
 
+        self.download_blob(text_blob_uri, output_path)
 
-        return text_dict_df
+        with open(output_path) as f:
+            text_file = f.read()
+
+            text_split = text_file.split(' ')
+
+        text_file_df = pd.DataFrame(text_split, columns=["Word"])
+        nb_row_dict=text_dict_df.shape[0]
+        nb_row_text=text_file_df.shape[0]
+        if nb_row_text>=nb_row_dict:
+            text_file_df["Offset"]=text_dict_df["Offset"]
+            text_file_df["Duration"]=text_dict_df["Duration"]
+            text_file_df["Confidence"]=text_dict_df["Confidence"]
+            text_file_df["End_word"]=text_dict_df["End_word"]
+            return text_file_df
+        elif  nb_row_text<nb_row_dict:
+            text_dict_df["Word"][:nb_row_text] =text_file_df["Word"]
+            text_dict_df["Word"][nb_row_text:] =""
+            return text_dict_df
+
+
+
 
 class BigQueryClient:
     """A class for Big Query Management."""
