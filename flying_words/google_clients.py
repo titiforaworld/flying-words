@@ -172,38 +172,63 @@ class BigQueryClient:
         return ordered_speaking_time
 
 
-    def words_diarization_info_merger(self, text_file_df :pd.DataFrame, episode_id:str, bqClient):
+    def words_diarization_info_merger(self, transcript_df :pd.DataFrame, episode_id:str):
         """
         text_file_df is taken from the get_transcript_df function above.
         """
-        speak_time = self.episode_speaking_time_df(episode_id).sort_values('start')
+        speak_time_df = self.episode_speaking_time_df(episode_id).sort_values('start')
 
-        # Create the text_file_df
-        text_file_df["name_id"] ="to_be_filled"
-        text_file_df['range_speaker'] = "to_be_filled"
+        # # Create the text_file_df
+        # transcript_df["name_id"] ="to_be_filled"
+        # transcript_df['range_speaker'] = "to_be_filled"
 
-        j=0
-        for i in range(text_file_df.shape[0]):
-            if text_file_df["End_word"].iloc[i] < speak_time["end"].loc[j]:
-                text_file_df["name_id"].iloc[i] = speak_time["name_id"].loc[j]
-                text_file_df["range_speaker"].iloc[i] = speak_time["range_speaker"].loc[j].astype(int)
+        # j=0
+        # for i in range(transcript_df.shape[0]):
+        #     if transcript_df["End_word"].iloc[i] < speak_time_df["end"].loc[j]:
+        #         transcript_df["name_id"].iloc[i] = speak_time_df["name_id"].loc[j]
+        #         transcript_df["range_speaker"].iloc[i] = speak_time_df["range_speaker"].loc[j].astype(int)
 
-        else :
-            text_file_df["name_id"].iloc[i]=speak_time["name_id"].loc[j+1]
-            text_file_df["range_speaker"].iloc[i] = speak_time["range_speaker"].loc[j+1].astype(int)
-            j=j+1
+        # else :
+        #     transcript_df["name_id"].iloc[i]=speak_time_df["name_id"].loc[j+1]
+        #     transcript_df["range_speaker"].iloc[i] = speak_time_df["range_speaker"].loc[j+1].astype(int)
+        #     j=j+1
 
-        # Create the text_list
-        speaking_time_by_speaker_df = text_file_df.groupby('range_speaker', as_index=False).idxmax()
+        # # Create the text_list
+        # speaking_time_by_speaker_df = transcript_df.groupby('range_speaker', as_index=False).idxmax()
 
-        text_list=[]
-        for j in range(speaking_time_by_speaker_df.shape[0]):
-            if j==0 :
-                text_list.append(" ".join([ text_file_df["Word"].iloc[i] for i in range(speaking_time_by_speaker_df["End_word"].iloc[j])]))
-            else :
-                text_list.append(" ".join([ text_file_df["Word"].iloc[i] for i in range(speaking_time_by_speaker_df["End_word"].iloc[j-1], speaking_time_by_speaker_df["End_word"].iloc[j])]))
+        # text_list=[]
+        # for j in range(speaking_time_by_speaker_df.shape[0]):
+        #     if j==0 :
+        #         text_list.append(" ".join([ transcript_df["Word"].iloc[i] for i in range(speaking_time_by_speaker_df["End_word"].iloc[j])]))
+        #     else :
+        #         text_list.append(" ".join([ transcript_df["Word"].iloc[i] for i in range(speaking_time_by_speaker_df["End_word"].iloc[j-1], speaking_time_by_speaker_df["End_word"].iloc[j])]))
 
-        # Add the transcript to the speak_time dataframe
-        speak_time['transcript'] = pd.Series(text_list)
+        # # Add the transcript to the speak_time dataframe
+        # speak_time_df['transcript'] = pd.Series(text_list)
 
-        return speak_time
+        def get_segment(x, speak_time_df: pd.DataFrame):
+            for i, item in speak_time_df['end'].iteritems():
+                if x['End_word'] < item:
+                    return speak_time_df['name_id'][i]
+
+        transcript_df['name_id'] = transcript_df.apply(lambda row: get_segment(row, speak_time_df), axis=1)
+
+        transcript_segments = []
+        previous_word_serie = None
+        for i, word_serie in transcript_df.iterrows():
+            if i==0:
+                transcript_segments.append([word_serie['Word']])
+            else:
+                if word_serie['name_id'] == previous_word_serie['name_id']:
+                    transcript_segments[-1].append(word_serie['Word'])
+                else:
+                    transcript_segments.append([word_serie['Word']])
+            previous_word_serie = word_serie
+
+        transcript_segments = [' '.join(transcripts_segment) for transcripts_segment in transcript_segments]
+
+        speak_time_df['transcript'] = pd.Series(transcript_segments)
+
+        speak_time_df
+
+        return speak_time_df
