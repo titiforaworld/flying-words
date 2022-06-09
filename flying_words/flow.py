@@ -105,12 +105,13 @@ def transcription(target: Target,
                   merged_audio_info,
                   bqClient: BigQueryClient,
                   gsClient: StorageClient,
-                  bucket_name):
+                  bucket_name,
+                  azure_token):
 
     print(Fore.GREEN + "\n# 🐙 Prefect task - Transcript diffusion:" + Style.RESET_ALL)
 
     transcription = Transcription(merged_audio_info['diffusion_audio'], target.table['episode_id'])
-    transcription.make_transcription()
+    transcription.make_transcription(azure_token)
 
     transcript_blob_uri, transcript_dict_blob_uri = transcription.upload_to_gcp(gsClient, bucket_name, bqClient)
 
@@ -173,7 +174,8 @@ def build_flow(env_vars):
                                                                       merged_audio_info,
                                                                       bqClient,
                                                                       gsClient,
-                                                                      env_vars['gcp_bucket'])
+                                                                      env_vars['gcp_bucket'],
+                                                                      env_vars['azure_token'])
 
         get_result(target,
                    bqClient,

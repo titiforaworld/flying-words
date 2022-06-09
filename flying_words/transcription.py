@@ -19,10 +19,10 @@ class Transcription:
         self.result = None
 
 
-    def make_transcription(self):
+    def make_transcription(self, azure_token):
         """Process diarization on audio-souce."""
 
-        speech_config = speechsdk.SpeechConfig(subscription=os.getenv("AZURE_TOKEN"),
+        speech_config = speechsdk.SpeechConfig(subscription=azure_token,
                                                region="francecentral",
                                                speech_recognition_language = 'fr-FR')
 
